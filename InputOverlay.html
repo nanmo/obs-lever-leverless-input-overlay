@@ -167,6 +167,13 @@
     /* システムボタン個別色 */
     --btn-08-bg: rgba(30, 30, 40, 0.85); --btn-08-act: rgba(0, 210, 255, 1.0); /* Btn 08 (View) */
     --btn-09-bg: rgba(30, 30, 40, 0.85); --btn-09-act: rgba(0, 210, 255, 1.0); /* Btn 09 (Menu) */
+
+    /* ------------------------------------------------------
+       6. 対象コントローラー（1P/2P等）指定設定 【上級者用】
+          ・auto : 接続されているすべてのコントローラーの入力を受け取る（標準）
+          ・0〜3 : 指定した番号（Gamepad APIインデックス）のコントローラーのみを固定監視
+       ------------------------------------------------------ */
+    --gamepad-index: auto;
   }
   /* ========================================================
      ★ 全設定集中管理エリア 終了
@@ -429,8 +436,12 @@
     ctrlModeText = "LEVERLESS (ALL-BUTTON)";
   }
 
+  const gpIndexSetting = rootStyle.getPropertyValue('--gamepad-index').trim().replace(/^"|"$/g, '');
+  const targetGamepadIndex = (/^\d+$/.test(gpIndexSetting)) ? parseInt(gpIndexSetting, 10) : null;
+
   if (modeDisplayEl) {
-    modeDisplayEl.textContent = `MODE: ${ctrlModeText}`;
+    const idSuffix = (targetGamepadIndex !== null) ? ` (ID: ${targetGamepadIndex})` : '';
+    modeDisplayEl.textContent = `MODE: ${ctrlModeText}${idSuffix}`;
   }
 
   function applyLabelAndAdjustSize(el, label) {
@@ -472,23 +483,48 @@
 
   function pollGamepad() {
     const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
-    let gp = null;
+    const targetGamepads = [];
 
     if (gamepads) {
-      for (let i = 0; i < gamepads.length; i++) {
-        if (gamepads[i] && gamepads[i].connected) {
-          gp = gamepads[i];
-          break;
+      if (targetGamepadIndex !== null) {
+        if (gamepads[targetGamepadIndex] && gamepads[targetGamepadIndex].connected) {
+          targetGamepads.push(gamepads[targetGamepadIndex]);
+        }
+      } else {
+        for (let i = 0; i < gamepads.length; i++) {
+          if (gamepads[i] && gamepads[i].connected) {
+            targetGamepads.push(gamepads[i]);
+          }
         }
       }
     }
 
-    if (gp && gp.buttons) {
-      for (let i = 0; i < gp.buttons.length; i++) {
-        const b = gp.buttons[i];
-        const el = getBtnElement(i);
+    if (targetGamepads.length > 0) {
+      const pressedBtns = [];
+      let rx = 0;
+      let ry = 0;
+      const deadzone = 0.25;
+
+      for (let p = 0; p < targetGamepads.length; p++) {
+        const gp = targetGamepads[p];
+        if (gp.buttons) {
+          for (let i = 0; i < gp.buttons.length; i++) {
+            if (gp.buttons[i] && gp.buttons[i].pressed) {
+              pressedBtns[i] = true;
+            }
+          }
+        }
+        if (gp.axes && gp.axes.length >= 2) {
+          if (Math.abs(gp.axes[0]) > deadzone && Math.abs(gp.axes[0]) > Math.abs(rx)) rx = gp.axes[0];
+          if (Math.abs(gp.axes[1]) > deadzone && Math.abs(gp.axes[1]) > Math.abs(ry)) ry = gp.axes[1];
+        }
+      }
+
+      for (let i = 0; i < btnIndices.length; i++) {
+        const idx = btnIndices[i];
+        const el = getBtnElement(idx);
         if (el) {
-          if (b && b.pressed) {
+          if (pressedBtns[idx]) {
             el.classList.add('active');
           } else {
             el.classList.remove('active');
@@ -496,20 +532,11 @@
         }
       }
 
-      let rx = 0;
-      let ry = 0;
-      const deadzone = 0.25;
+      if (pressedBtns[14]) rx = -1;
+      if (pressedBtns[15]) rx = 1;
+      if (pressedBtns[13]) ry = 1;
 
-      if (gp.axes && gp.axes.length >= 2) {
-        if (Math.abs(gp.axes[0]) > deadzone) rx = gp.axes[0];
-        if (Math.abs(gp.axes[1]) > deadzone) ry = gp.axes[1];
-      }
-
-      if (gp.buttons[14] && gp.buttons[14].pressed) rx = -1;
-      if (gp.buttons[15] && gp.buttons[15].pressed) rx = 1;
-      if (gp.buttons[13] && gp.buttons[13].pressed) ry = 1;
-
-      if ((gp.buttons[12] && gp.buttons[12].pressed) || ry < -0.5) {
+      if (pressedBtns[12] || ry < -0.5) {
         ry = -1;
       }
 
@@ -529,8 +556,9 @@
       else if (ry > 0.5) activeBtns.push("↓");
       else if (ry < -0.5) activeBtns.push("↑");
 
-      for (let i = 0; i < gp.buttons.length; i++) {
-        if (gp.buttons[i] && gp.buttons[i].pressed) {
+      const maxBtnLen = Math.max(btnIndices.length, pressedBtns.length);
+      for (let i = 0; i < maxBtnLen; i++) {
+        if (pressedBtns[i]) {
           if (i >= 12 && i <= 15) continue;
 
           const el = getBtnElement(i);

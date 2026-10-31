@@ -95,5 +95,13 @@ OBS Studioのブラウザソースや一般的なWebブラウザ上で動作す�
 .
 ├── InputOverlay.html   # オーバーレイ本体（HTML / CSS / JS 単一ファイル）
 ├── README.md           # ドキュメント
+├── LICENSE             # ライセンス定義（0BSD）
 └── .gitignore          # Git除外設定
 ```
+
+---
+
+## ライセンス
+
+本プロジェクトは **0BSD (BSD Zero Clause License)** の下で公開されています。
+著作権表示やライセンス文の保持義務を含め、条件なし（無保証）で自由に使用・複製・改変・再配布が可能です。詳細は [LICENSE](LICENSE) を参照してください。

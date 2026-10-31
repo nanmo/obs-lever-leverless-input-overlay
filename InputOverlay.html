@@ -510,7 +510,8 @@
       }
 
       if (leverBall) {
-        leverBall.style.transform = `translate(${rx * 34}px, ${ry * 34}px)`;
+        const leverRy = (isJump && ry < 0) ? 0 : ry;
+        leverBall.style.transform = `translate(${rx * 34}px, ${leverRy * 34}px)`;
       }
 
       const activeBtns = [];

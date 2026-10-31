@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Input Overlay</title>
+  <style>
+  /*
+   * =================================================================
+   * 【調整・開発時のメモ / 動作確認手順】
+   * =================================================================
+   * ■ 通常のブラウザで確認しながら調整する場合
+   * 1. HTMLファイルをブラウザ（ChromeやEdgeなど）で開きます。
+   * 2. コントローラーのボタンを何か1回押すと入力が反映されます。
+   * 3. エディタでファイルを編集・保存後、F5キーで再読み込みします。
+   *
+   * ■ OBSのブラウザソース内で確認しながら調整する場合
+   * - OBSのソース設定で『幅: 640』『高さ: 360』に指定して使用してください。
+   * - 設定変更後はソースのプロパティから『現在のページキャッシュを更新』してください。
+   *
+   * License: 0BSD (SPDX-License-Identifier: 0BSD)
+   * Copyright (C) 2026 Nanmo
+   * =================================================================
+   */
+
+  /* ========================================================
+     ★ 全設定集中管理エリア (CSS Variables)
+     ======================================================== */
+  :root {
+    /* ------------------------------------------------------
+       1. モード切替・移動入力（レバー / 移動ボタン）表示設定
+       ------------------------------------------------------ */
+    --lever-display: none; /* レバー本体の表示 (flex / none) */
+    --mvmt-display:  flex; /* 移動ボタン(←↓→)表示 ※レバーレス構成で使用 */
+    --jump-display:  flex; /* 親指用ジャンプ(↑)ボタン表示 ※レバーモード時に追加表示すると、レバーの上方向が入らない表示になります */
+    --log-display:   flex; /* 下部入力履歴ログエリアの表示 */
+
+    /* ------------------------------------------------------
+       2. ボタン表示名設定 (data-label への代入テキスト)
+          [対応凡例]
+          ・ボタン番号: Gamepad API標準インデックス
+          ・Xbox / PS / 格ゲー(アケコン): 各コントローラーでの対応ボタン
+          ※ PS5実機接続時、CreateボタンはOSのシェア機能に専有され、
+             PC/ゲーム内で入力検知されない場合（代わりにタッチパッドが割り当てられる場合）があります。
+       ------------------------------------------------------ */
+    /* --- 移動ボタン（レバーレス方向入力系） --- */
+    --label-btn-14: "←";  /* Btn 14 | 移動ボタン左 */
+    --label-btn-13: "↓";  /* Btn 13 | 移動ボタン下 */
+    --label-btn-15: "→";  /* Btn 15 | 移動ボタン右 */
+    --label-jump:   "↑";  /* Btn 12 | 移動ボタン上 (親指ジャンプ) */
+
+    /* --- 攻撃ボタン（上段 / パンチ列） --- */
+    --label-btn-02: "LP";  /* Btn 02 | Xbox: X  | PS: □ (Square)   | 弱P (LP) */
+    --label-btn-03: "MP";  /* Btn 03 | Xbox: Y  | PS: △ (Triangle) | 中P (MP) */
+    --label-btn-05: "HP";  /* Btn 05 | Xbox: RB | PS: R1            | 強P (HP) */
+    --label-btn-04: "L1";  /* Btn 04 | Xbox: LB | PS: L1            | 4ボタン目/PARRY等 */
+
+    /* --- 攻撃ボタン（下段 / キック列） --- */
+    --label-btn-00: "LK";  /* Btn 00 | Xbox: A  | PS: × (Cross)    | 弱K (LK) */
+    --label-btn-01: "MK";  /* Btn 01 | Xbox: B  | PS: ○ (Circle)   | 中K (MK) */
+    --label-btn-07: "HK";  /* Btn 07 | Xbox: RT | PS: R2            | 強K (HK) */
+    --label-btn-06: "L2";  /* Btn 06 | Xbox: LT | PS: L2            | 4ボタン目/IMPACT等 */
+
+    /* --- サブ・機能系ボタン --- */
+    --label-btn-10: "L3";  /* Btn 10 | Xbox: LS | PS: L3 */
+    --label-btn-11: "R3";  /* Btn 11 | Xbox: RS | PS: R3 */
+
+    /* --- システム系ボタン --- */
+    --label-btn-08: "VIEW";/* Btn 08 | Xbox: View | PS: Share / Create / TouchPad ※ | Select/Back */
+                           /* ※ PS5本体接続時はCreateボタンがOS専有となりゲーム内で使用できない場合があります */
+    --label-btn-09: "MENU";/* Btn 09 | Xbox: Menu | PS: Options                      | Start */
+
+    /* ------------------------------------------------------
+       3. 各要素の配置座標・サイズ設定 (単位: px / flex or none)
+       ------------------------------------------------------ */
+    /* ボタンサイズ */
+    --size-btn-main: 62px; /* 標準ボタンサイズ (攻撃, L3/R3) */
+    --size-btn-sys:  48px; /* VIEW / MENU ボタンサイズ */
+    --size-btn-jump: 62px; /* 親指ジャンプボタンサイズ */
+
+    /* レバー・移動ボタン位置 */
+    --pos-lever-top: 87px;  --pos-lever-left: 120px; /* レバー本体 */
+
+    /* 左下移動ボタン位置・表示 */
+    --pos-btn-14-top: 135px; --pos-btn-14-left: 69px;  /* Btn 14 (移動←) */
+    --pos-btn-13-top: 105px; --pos-btn-13-left: 125px; /* Btn 13 (↓) */
+    --pos-btn-15-top: 135px; --pos-btn-15-left: 181px; /* Btn 15 (移動→) */
+    --pos-jump-top:   198px; --pos-jump-left:   224px; /* Btn 12 (移動↑ / ジャンプ) */
+
+    /* 攻撃ボタン位置・表示（上段） */
+    --disp-btn-02: flex; --pos-btn-02-top: 78px; --pos-btn-02-left: 325px; /* Btn 02 (弱P) */
+    --disp-btn-03: flex; --pos-btn-03-top: 78px; --pos-btn-03-left: 389px; /* Btn 03 (中P) */
+    --disp-btn-05: flex; --pos-btn-05-top: 78px; --pos-btn-05-left: 453px; /* Btn 05 (強P) */
+    --disp-btn-04: flex; --pos-btn-04-top: 78px; --pos-btn-04-left: 517px; /* Btn 04 (L1) */
+
+    /* 攻撃ボタン位置・表示（下段） */
+    --disp-btn-00: flex; --pos-btn-00-top: 142px; --pos-btn-00-left: 313px; /* Btn 00 (弱K) */
+    --disp-btn-01: flex; --pos-btn-01-top: 142px; --pos-btn-01-left: 377px; /* Btn 01 (中K) */
+    --disp-btn-07: flex; --pos-btn-07-top: 142px; --pos-btn-07-left: 441px; /* Btn 07 (強K) */
+    --disp-btn-06: flex; --pos-btn-06-top: 142px; --pos-btn-06-left: 505px; /* Btn 06 (L2) */
+
+    /* サブ・機能系ボタン位置・表示 */
+    --disp-btn-10: flex; --pos-btn-10-top: 110px; --pos-btn-10-left: 257px; /* Btn 10 (L3) */
+    --disp-btn-11: flex; --pos-btn-11-top: 210px; --pos-btn-11-left: 286px; /* Btn 11 (R3) */
+
+    /* システム系ボタン位置・表示 */
+    --disp-btn-08: flex; --pos-btn-08-top: 40px; --pos-btn-08-left: 60px;  /* Btn 08 (View) */
+    --disp-btn-09: flex; --pos-btn-09-top: 40px; --pos-btn-09-left: 116px; /* Btn 09 (Menu) */
+
+    /* ------------------------------------------------------
+       4. デザイン・カラーカスタマイズ設定 【中級者用】
+       ------------------------------------------------------ */
+    /* [全体背景] */
+    --bg-color:           rgba(15, 15, 20, 0.95);    /* ベース背景色(黒) */
+
+    /* [レバー関連] */
+    --lever-base-bg:      rgba(255, 255, 255, 0.05); /* レバー土台背景 */
+    --lever-base-border:  rgba(255, 255, 255, 0.2);  /* レバー土台枠線 */
+    --lever-ball-color-1: rgba(255, 82, 82, 1.0);    /* レバー玉グラデーション(内) */
+    --lever-ball-color-2: rgba(167, 0, 0, 1.0);      /* レバー玉グラデーション(外) */
+    --lever-ball-border:  rgba(255, 255, 255, 1.0);  /* レバー玉枠線 */
+
+    /* [ボタン：通常時] */
+    --btn-bg-color:       rgba(30, 30, 40, 0.85);    /* ボタン背景色 */
+    --btn-border-color:   rgba(255, 255, 255, 0.45); /* ボタン枠線色 */
+    --btn-text-color:     rgba(255, 255, 255, 1.0);  /* ボタン文字色 */
+
+    /* [ボタン：押下（アクティブ）時] */
+    --btn-active-bg:      rgba(0, 210, 255, 1.0);    /* 押下時背景色 */
+    --btn-active-border:  rgba(255, 255, 255, 1.0);  /* 押下時枠線色 */
+    --btn-active-text:    rgba(0, 0, 0, 1.0);        /* 押下時文字色 */
+    --btn-active-glow:    rgba(0, 210, 255, 0.8);    /* 押下時発光エフェクト */
+
+    /* [入力ログエリア] */
+    --log-bg-color:       rgba(0, 0, 0, 0.6);        /* ログ背景色 */
+    --log-border-color:   rgba(255, 255, 255, 0.15); /* ログ枠線色 */
+    --log-text-color:     rgba(255, 255, 255, 0.5);  /* 過去ログ文字色 */
+    --log-latest-color:   rgba(0, 210, 255, 1.0);    /* 最新ログ文字色 */
+
+    /* ------------------------------------------------------
+       5. 個別ボタン・カラーカスタマイズ設定 【上級者用】
+       ------------------------------------------------------ */
+    --btn-individual-color-enable: 0;
+
+    /* 移動ボタン個別色 */
+    --btn-14-bg: rgba(30, 30, 40, 0.85); --btn-14-act: rgba(255, 200, 0, 1.0); /* Btn 14 (←) */
+    --btn-13-bg: rgba(30, 30, 40, 0.85); --btn-13-act: rgba(255, 200, 0, 1.0); /* Btn 13 (↓) */
+    --btn-15-bg: rgba(30, 30, 40, 0.85); --btn-15-act: rgba(255, 200, 0, 1.0); /* Btn 15 (→) */
+    --btn-12-bg: rgba(30, 30, 40, 0.85); --btn-12-act: rgba(255, 200, 0, 1.0); /* Btn 12 (↑ / ジャンプ) */
+
+    /* 攻撃ボタン（上段）個別色 */
+    --btn-02-bg: rgba(30, 30, 40, 0.85); --btn-02-act: rgba(0, 210, 255, 1.0); /* Btn 02 (弱P) */
+    --btn-03-bg: rgba(30, 30, 40, 0.85); --btn-03-act: rgba(0, 210, 255, 1.0); /* Btn 03 (中P) */
+    --btn-05-bg: rgba(30, 30, 40, 0.85); --btn-05-act: rgba(0, 210, 255, 1.0); /* Btn 05 (強P) */
+    --btn-04-bg: rgba(30, 30, 40, 0.85); --btn-04-act: rgba(0, 210, 255, 1.0); /* Btn 04 (L1) */
+
+    /* 攻撃ボタン（下段）個別色 */
+    --btn-00-bg: rgba(30, 30, 40, 0.85); --btn-00-act: rgba(255, 82, 82, 1.0); /* Btn 00 (弱K) */
+    --btn-01-bg: rgba(30, 30, 40, 0.85); --btn-01-act: rgba(255, 82, 82, 1.0); /* Btn 01 (中K) */
+    --btn-07-bg: rgba(30, 30, 40, 0.85); --btn-07-act: rgba(255, 82, 82, 1.0); /* Btn 07 (強K) */
+    --btn-06-bg: rgba(30, 30, 40, 0.85); --btn-06-act: rgba(255, 82, 82, 1.0); /* Btn 06 (L2) */
+
+    /* サブボタン個別色 */
+    --btn-10-bg: rgba(30, 30, 40, 0.85); --btn-10-act: rgba(0, 210, 255, 1.0); /* Btn 10 (L3) */
+    --btn-11-bg: rgba(30, 30, 40, 0.85); --btn-11-act: rgba(0, 210, 255, 1.0); /* Btn 11 (R3) */
+
+    /* システムボタン個別色 */
+    --btn-08-bg: rgba(30, 30, 40, 0.85); --btn-08-act: rgba(0, 210, 255, 1.0); /* Btn 08 (View) */
+    --btn-09-bg: rgba(30, 30, 40, 0.85); --btn-09-act: rgba(0, 210, 255, 1.0); /* Btn 09 (Menu) */
+  }
+  /* ========================================================
+     ★ 全設定集中管理エリア 終了
+     ======================================================== */
+
+  /* ------------------------------------------------------
+     基本スタイル定義
+     ------------------------------------------------------ */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background-color: var(--bg-color); /* 黒系背景 */
+    color: rgba(255, 255, 255, 1.0);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    overflow: hidden;
+    user-select: none;
+    width: 640px;
+    height: 360px;
+  }
+
+  #overlay {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* モード表示バッジ */
+  #mode-display {
+    position: absolute;
+    top: 15px;
+    left: 20px;
+    font-family: monospace, sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    color: rgba(0, 210, 255, 0.9);
+    background: rgba(0, 0, 0, 0.4);
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 210, 255, 0.3);
+    letter-spacing: 0.5px;
+  }
+
+  /* ------------------------------------------------------
+     共通ボタン描画
+     ------------------------------------------------------ */
+  .btn {
+    position: absolute;
+    width: var(--size-btn-main);
+    height: var(--size-btn-main);
+    border-radius: 50%;
+    border: 2px solid var(--btn-border-color);
+    background-color: var(--btn-bg-color);
+    color: var(--btn-text-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 22px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.05s, transform 0.05s, border-color 0.05s;
+  }
+  .btn::after {
+    content: attr(data-label);
+  }
+  .btn.active {
+    background-color: var(--btn-active-bg);
+    border-color: var(--btn-active-border);
+    color: var(--btn-active-text);
+    transform: scale(0.92);
+    box-shadow: 0 0 12px var(--btn-active-glow);
+  }
+
+  /* 文字数に応じたフォントサイズ自動調整 */
+  .btn.text-long  { font-size: 15px; } /* 3〜4文字 */
+  .btn.text-xlong { font-size: 12px; } /* 5文字以上 */
+
+  /* 特殊ボタンサイズ・フォント */
+  .btn-sys { width: var(--size-btn-sys); height: var(--size-btn-sys); font-size: 13px; }
+  .btn-sys.text-long  { font-size: 11px; } /* VIEW / MENU 等の4文字表記が収まるよう最適化 */
+  .btn-sys.text-xlong { font-size: 9px; }
+  .btn-jump { width: var(--size-btn-jump); height: var(--size-btn-jump); }
+
+  /* モード依存の表示切替 */
+  .mode-lever { display: var(--lever-display); align-items: center; justify-content: center; }
+  .mode-mvmt  { display: var(--mvmt-display); }
+  .mode-jump  { display: var(--jump-display); }
+  .mode-log   { display: var(--log-display); align-items: center; }
+
+  /* 位置指定マッピング */
+  #btn-08, #btn-8 { display: var(--disp-btn-08); top: var(--pos-btn-08-top); left: var(--pos-btn-08-left); }
+  #btn-09, #btn-9 { display: var(--disp-btn-09); top: var(--pos-btn-09-top); left: var(--pos-btn-09-left); }
+  #btn-14         { top: var(--pos-btn-14-top); left: var(--pos-btn-14-left); }
+  #btn-13         { top: var(--pos-btn-13-top); left: var(--pos-btn-13-left); }
+  #btn-15         { top: var(--pos-btn-15-top); left: var(--pos-btn-15-left); }
+  #btn-12         { top: var(--pos-jump-top);   left: var(--pos-jump-left); }
+  #btn-10         { display: var(--disp-btn-10); top: var(--pos-btn-10-top); left: var(--pos-btn-10-left); }
+  #btn-11         { display: var(--disp-btn-11); top: var(--pos-btn-11-top); left: var(--pos-btn-11-left); }
+  #btn-02, #btn-2 { display: var(--disp-btn-02); top: var(--pos-btn-02-top); left: var(--pos-btn-02-left); }
+  #btn-03, #btn-3 { display: var(--disp-btn-03); top: var(--pos-btn-03-top); left: var(--pos-btn-03-left); }
+  #btn-05, #btn-5 { display: var(--disp-btn-05); top: var(--pos-btn-05-top); left: var(--pos-btn-05-left); }
+  #btn-04, #btn-4 { display: var(--disp-btn-04); top: var(--pos-btn-04-top); left: var(--pos-btn-04-left); }
+  #btn-00, #btn-0 { display: var(--disp-btn-00); top: var(--pos-btn-00-top); left: var(--pos-btn-00-left); }
+  #btn-01, #btn-1 { display: var(--disp-btn-01); top: var(--pos-btn-01-top); left: var(--pos-btn-01-left); }
+  #btn-07, #btn-7 { display: var(--disp-btn-07); top: var(--pos-btn-07-top); left: var(--pos-btn-07-left); }
+  #btn-06, #btn-6 { display: var(--disp-btn-06); top: var(--pos-btn-06-top); left: var(--pos-btn-06-left); }
+
+  /* 個別カラー適用 */
+  body.individual-colors-on #btn-14 { background-color: var(--btn-14-bg); }
+  body.individual-colors-on #btn-14.active { background-color: var(--btn-14-act); }
+  body.individual-colors-on #btn-13 { background-color: var(--btn-13-bg); }
+  body.individual-colors-on #btn-13.active { background-color: var(--btn-13-act); }
+  body.individual-colors-on #btn-15 { background-color: var(--btn-15-bg); }
+  body.individual-colors-on #btn-15.active { background-color: var(--btn-15-act); }
+  body.individual-colors-on #btn-12 { background-color: var(--btn-12-bg); }
+  body.individual-colors-on #btn-12.active { background-color: var(--btn-12-act); }
+
+  body.individual-colors-on #btn-02, body.individual-colors-on #btn-2 { background-color: var(--btn-02-bg); }
+  body.individual-colors-on #btn-02.active, body.individual-colors-on #btn-2.active { background-color: var(--btn-02-act); }
+  body.individual-colors-on #btn-03, body.individual-colors-on #btn-3 { background-color: var(--btn-03-bg); }
+  body.individual-colors-on #btn-03.active, body.individual-colors-on #btn-3.active { background-color: var(--btn-03-act); }
+  body.individual-colors-on #btn-05, body.individual-colors-on #btn-5 { background-color: var(--btn-05-bg); }
+  body.individual-colors-on #btn-05.active, body.individual-colors-on #btn-5.active { background-color: var(--btn-05-act); }
+  body.individual-colors-on #btn-04, body.individual-colors-on #btn-4 { background-color: var(--btn-04-bg); }
+  body.individual-colors-on #btn-04.active, body.individual-colors-on #btn-4.active { background-color: var(--btn-04-act); }
+
+  body.individual-colors-on #btn-00, body.individual-colors-on #btn-0 { background-color: var(--btn-00-bg); }
+  body.individual-colors-on #btn-00.active, body.individual-colors-on #btn-0.active { background-color: var(--btn-00-act); }
+  body.individual-colors-on #btn-01, body.individual-colors-on #btn-1 { background-color: var(--btn-01-bg); }
+  body.individual-colors-on #btn-01.active, body.individual-colors-on #btn-1.active { background-color: var(--btn-01-act); }
+  body.individual-colors-on #btn-07, body.individual-colors-on #btn-7 { background-color: var(--btn-07-bg); }
+  body.individual-colors-on #btn-07.active, body.individual-colors-on #btn-7.active { background-color: var(--btn-07-act); }
+  body.individual-colors-on #btn-06, body.individual-colors-on #btn-6 { background-color: var(--btn-06-bg); }
+  body.individual-colors-on #btn-06.active, body.individual-colors-on #btn-6.active { background-color: var(--btn-06-act); }
+
+  body.individual-colors-on #btn-10 { background-color: var(--btn-10-bg); }
+  body.individual-colors-on #btn-10.active { background-color: var(--btn-10-act); }
+  body.individual-colors-on #btn-11 { background-color: var(--btn-11-bg); }
+  body.individual-colors-on #btn-11.active { background-color: var(--btn-11-act); }
+
+  body.individual-colors-on #btn-08, body.individual-colors-on #btn-8 { background-color: var(--btn-08-bg); }
+  body.individual-colors-on #btn-08.active, body.individual-colors-on #btn-8.active { background-color: var(--btn-08-act); }
+  body.individual-colors-on #btn-09, body.individual-colors-on #btn-9 { background-color: var(--btn-09-bg); }
+  body.individual-colors-on #btn-09.active, body.individual-colors-on #btn-9.active { background-color: var(--btn-09-act); }
+
+  /* ------------------------------------------------------
+     レバー描画
+     ------------------------------------------------------ */
+  #lever-base {
+    position: absolute;
+    top: var(--pos-lever-top);
+    left: var(--pos-lever-left);
+    width: 116px;
+    height: 116px;
+    border-radius: 50%;
+    background: var(--lever-base-bg);
+    border: 2px dashed var(--lever-base-border);
+  }
+  #lever-ball {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, var(--lever-ball-color-1), var(--lever-ball-color-2));
+    border: 2px solid var(--lever-ball-border);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    transition: transform 0.04s ease-out;
+  }
+
+  /* ------------------------------------------------------
+     入力履歴ログ描画
+     ------------------------------------------------------ */
+  #input-log {
+    position: absolute;
+    bottom: 12px;
+    left: 15px;
+    width: 610px;
+    height: 38px;
+    background: var(--log-bg-color);
+    border: 1px solid var(--log-border-color);
+    border-radius: 6px;
+    flex-direction: row;
+    padding: 0 14px;
+    overflow: hidden;
+    font-family: monospace, "Yu Gothic UI", "Meiryo", sans-serif;
+    font-size: 14px;
+    gap: 12px;
+  }
+  .log-item {
+    white-space: nowrap;
+    opacity: 0.5;
+    color: var(--log-text-color);
+    flex-shrink: 0;
+  }
+  .log-item:first-child {
+    opacity: 1;
+    color: var(--log-latest-color);
+    font-weight: bold;
+  }
+  </style>
+</head>
+<body>
+
+<div id="overlay">
+  <!-- モード表示バッジ -->
+  <div id="mode-display">MODE: ---</div>
+
+  <!-- レバー本体 -->
+  <div id="lever-base" class="mode-lever">
+    <div id="lever-ball"></div>
+  </div>
+
+  <!-- システムボタン -->
+  <div id="btn-08" class="btn btn-sys"></div>
+  <div id="btn-09" class="btn btn-sys"></div>
+
+  <!-- 移動ボタン (レバーレス時用: ←↓→) -->
+  <div id="btn-14" class="btn mode-mvmt"></div>
+  <div id="btn-13" class="btn mode-mvmt"></div>
+  <div id="btn-15" class="btn mode-mvmt"></div>
+
+  <!-- 親指ジャンプボタン -->
+  <div id="btn-12" class="btn btn-jump mode-jump"></div>
+
+  <!-- サブ・機能系ボタン (L3 / R3) -->
+  <div id="btn-10" class="btn"></div>
+  <div id="btn-11" class="btn"></div>
+
+  <!-- 攻撃ボタン -->
+  <div id="btn-02" class="btn"></div>
+  <div id="btn-03" class="btn"></div>
+  <div id="btn-05" class="btn"></div>
+  <div id="btn-04" class="btn"></div>
+  <div id="btn-00" class="btn"></div>
+  <div id="btn-01" class="btn"></div>
+  <div id="btn-07" class="btn"></div>
+  <div id="btn-06" class="btn"></div>
+
+  <!-- 入力ログ -->
+  <div id="input-log" class="mode-log"></div>
+</div>
+
+<script>
+  function getBtnElement(idx) {
+    const pfx2 = String(idx).padStart(2, '0');
+    return document.getElementById(`btn-${pfx2}`) || document.getElementById(`btn-${idx}`);
+  }
+
+  const rootStyle = getComputedStyle(document.documentElement);
+  const btnIndices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+
+  const modeDisplayEl = document.getElementById('mode-display');
+  const isLever = rootStyle.getPropertyValue('--lever-display').trim() === 'flex';
+  const isMvmt  = rootStyle.getPropertyValue('--mvmt-display').trim() === 'flex';
+  const isJump  = rootStyle.getPropertyValue('--jump-display').trim() === 'flex';
+
+  let ctrlModeText = "CUSTOM";
+  if (isLever && !isMvmt && !isJump) {
+    ctrlModeText = "LEVER";
+  } else if (isLever && isJump) {
+    ctrlModeText = "LEVER + JUMP";
+  } else if (!isLever && isMvmt) {
+    ctrlModeText = "LEVERLESS (ALL-BUTTON)";
+  }
+
+  if (modeDisplayEl) {
+    modeDisplayEl.textContent = `MODE: ${ctrlModeText}`;
+  }
+
+  function applyLabelAndAdjustSize(el, label) {
+    if (!el || !label) return;
+    el.setAttribute('data-label', label);
+
+    const len = label.length;
+    el.classList.remove('text-long', 'text-xlong');
+    if (len >= 5) {
+      el.classList.add('text-xlong');
+    } else if (len >= 3) {
+      el.classList.add('text-long');
+    }
+  }
+
+  for (let i = 0; i < btnIndices.length; i++) {
+    const idx = btnIndices[i];
+    const el = getBtnElement(idx);
+    if (el) {
+      const varName = (idx === 12) ? '--label-jump' : `--label-btn-${String(idx).padStart(2, '0')}`;
+      let label = rootStyle.getPropertyValue(varName).trim().replace(/^"|"$/g, '');
+      if (!label && idx !== 12) {
+        label = rootStyle.getPropertyValue(`--label-btn-${idx}`).trim().replace(/^"|"$/g, '');
+      }
+      if (label) applyLabelAndAdjustSize(el, label);
+    }
+  }
+
+  const isIndividualEnabled = rootStyle.getPropertyValue('--btn-individual-color-enable').trim() === '1';
+  if (isIndividualEnabled) {
+    document.body.classList.add('individual-colors-on');
+  }
+
+  const leverBall = document.getElementById('lever-ball');
+  const inputLog  = document.getElementById('input-log');
+
+  let logHistory = [];
+  let lastStateStr = "";
+
+  function pollGamepad() {
+    const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+    let gp = null;
+
+    if (gamepads) {
+      for (let i = 0; i < gamepads.length; i++) {
+        if (gamepads[i] && gamepads[i].connected) {
+          gp = gamepads[i];
+          break;
+        }
+      }
+    }
+
+    if (gp && gp.buttons) {
+      for (let i = 0; i < gp.buttons.length; i++) {
+        const b = gp.buttons[i];
+        const el = getBtnElement(i);
+        if (el) {
+          if (b && b.pressed) {
+            el.classList.add('active');
+          } else {
+            el.classList.remove('active');
+          }
+        }
+      }
+
+      let rx = 0;
+      let ry = 0;
+      const deadzone = 0.25;
+
+      if (gp.axes && gp.axes.length >= 2) {
+        if (Math.abs(gp.axes[0]) > deadzone) rx = gp.axes[0];
+        if (Math.abs(gp.axes[1]) > deadzone) ry = gp.axes[1];
+      }
+
+      if (gp.buttons[14] && gp.buttons[14].pressed) rx = -1;
+      if (gp.buttons[15] && gp.buttons[15].pressed) rx = 1;
+      if (gp.buttons[13] && gp.buttons[13].pressed) ry = 1;
+
+      if ((gp.buttons[12] && gp.buttons[12].pressed) || ry < -0.5) {
+        ry = -1;
+      }
+
+      if (leverBall) {
+        const leverRy = (isJump && ry < 0) ? 0 : ry;
+        leverBall.style.transform = `translate(${rx * 34}px, ${leverRy * 34}px)`;
+      }
+
+      const activeBtns = [];
+
+      if (rx < -0.5 && ry > 0.5) activeBtns.push("↙");
+      else if (rx > 0.5 && ry > 0.5) activeBtns.push("↘");
+      else if (rx < -0.5 && ry < -0.5) activeBtns.push("↖");
+      else if (rx > 0.5 && ry < -0.5) activeBtns.push("↗");
+      else if (rx < -0.5) activeBtns.push("←");
+      else if (rx > 0.5) activeBtns.push("→");
+      else if (ry > 0.5) activeBtns.push("↓");
+      else if (ry < -0.5) activeBtns.push("↑");
+
+      for (let i = 0; i < gp.buttons.length; i++) {
+        if (gp.buttons[i] && gp.buttons[i].pressed) {
+          if (i >= 12 && i <= 15) continue;
+
+          const el = getBtnElement(i);
+          if (el) {
+            const lbl = el.getAttribute('data-label') || String(i);
+            if (!activeBtns.includes(lbl)) {
+              activeBtns.push(lbl);
+            }
+          }
+        }
+      }
+
+      const currentStateStr = activeBtns.join('+');
+      if (currentStateStr !== lastStateStr && currentStateStr !== "") {
+        logHistory.unshift(currentStateStr);
+        if (logHistory.length > 25) logHistory.pop();
+        inputLog.innerHTML = logHistory.map(s => `<span class="log-item">${s}</span>`).join('');
+        lastStateStr = currentStateStr;
+      } else if (currentStateStr === "") {
+        lastStateStr = "";
+      }
+    }
+
+    requestAnimationFrame(pollGamepad);
+  }
+
+  requestAnimationFrame(pollGamepad);
+</script>
+
+</body>
+</html>

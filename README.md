@@ -45,13 +45,14 @@ OBS Studioのブラウザソースや一般的なWebブラウザ上で動作す�
 
 ### 1. モード切替（レバー / レバーレス / ジャンプボタン）
 
-| 設定パターン | `--lever-display` | `--mvmt-display` | `--jump-display` | モード表示 (`#mode-display`) |
-| :--- | :---: | :---: | :---: | :--- |
-| **レバー（標準）** | `flex` | `none` | `none` | `MODE: LEVER` |
-| **レバー＋ジャンプボタン** | `flex` | `none` | `flex` | `MODE: LEVER + JUMP` |
-| **レバーレス** | `none` | `flex` | `flex` | `MODE: LEVERLESS (ALL-BUTTON)` |
+| 設定パターン | `--lever-display` | `--mvmt-display` | `--jump-display` | モード表示 (`#mode-display`) | 設定済みサンプル |
+| :--- | :---: | :---: | :---: | :--- | :--- |
+| **レバー（標準）** | `flex` | `none` | `none` | `MODE: LEVER` | `InputOverlay.html` |
+| **レバー＋ジャンプボタン** | `flex` | `none` | `flex` | `MODE: LEVER + JUMP` | `mode_samples/InputOverlay_LeverPlusJumpButton.html` |
+| **レバーレス** | `none` | `flex` | `flex` | `MODE: LEVERLESS (ALL-BUTTON)` | `mode_samples/InputOverlay_Leverless.html` |
 
 - `--log-display` を `none` にすると、下部の入力履歴ログを非表示にできます。
+- `mode_samples/` ディレクトリ内に、あらかじめ「レバー＋ジャンプボタン」「レバーレス」に設定済みのサンプルファイルを同梱しています。そのままOBSに読み込ませて使用することも可能です。
 
 ### 2. ボタン表示ラベルの変更
 
@@ -93,7 +94,10 @@ OBS Studioのブラウザソースや一般的なWebブラウザ上で動作す�
 
 ```text
 .
-├── InputOverlay.html   # オーバーレイ本体（HTML / CSS / JS 単一ファイル）
+├── InputOverlay.html   # オーバーレイ本体（標準：レバー構成）
+├── mode_samples/       # モード変更済みサンプル
+│   ├── InputOverlay_LeverPlusJumpButton.html  # レバー＋ジャンプボタン構成
+│   └── InputOverlay_Leverless.html            # レバーレス構成
 ├── README.md           # ドキュメント
 ├── LICENSE             # ライセンス定義（0BSD）
 └── .gitignore          # Git除外設定

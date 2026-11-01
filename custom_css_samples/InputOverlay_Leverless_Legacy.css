@@ -1,0 +1,21 @@
+/*
+ * OBS ブラウザソース「カスタムCSS」用設定サンプル：レガシーレバーレス（12ボタン）構成
+ * （L3/R3 の増設ボタンを非表示にし、←・↓・→・↑ の位置を調整した配置）
+ * License: 0BSD (SPDX-License-Identifier: 0BSD)
+ */
+:root {
+  --lever-display: none; /* レバー本体の表示 (flex / none) */
+  --mvmt-display:  flex; /* 移動ボタン(←↓→)表示 */
+  --jump-display:  flex; /* 親指用ジャンプ(↑)ボタン表示 */
+  --log-display:   flex; /* 下部入力履歴ログエリアの表示 */
+
+  /* 移動ボタン位置（←・↓ が上段に並び、人差し指の → が一段下がり、↑ が中央下寄りの配置） */
+  --pos-btn-14-top: 102px; --pos-btn-14-left: 88px;  /* Btn 14 (移動←) */
+  --pos-btn-13-top: 102px; --pos-btn-13-left: 152px; /* Btn 13 (↓) */
+  --pos-btn-15-top: 132px; --pos-btn-15-left: 208px; /* Btn 15 (移動→) */
+  --pos-jump-top:   196px; --pos-jump-left:   245px; /* Btn 12 (移動↑ / ジャンプ) */
+
+  /* サブボタン（増設 L3 / R3 を非表示） */
+  --disp-btn-10: none; /* Btn 10 (L3) */
+  --disp-btn-11: none; /* Btn 11 (R3) */
+}

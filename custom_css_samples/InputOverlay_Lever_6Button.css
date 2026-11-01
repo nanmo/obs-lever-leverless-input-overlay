@@ -1,0 +1,30 @@
+/*
+ * OBS ブラウザソース「カスタムCSS」用設定サンプル：レバー 6ボタンアケコン構成
+ * （弱P・中P・強P / 弱K・中K・強K の6ボタンのみ表示し、弱P/弱Kを一段下げた配置に変更）
+ * License: 0BSD (SPDX-License-Identifier: 0BSD)
+ */
+:root {
+  --lever-display: flex; /* レバー本体の表示 (flex / none) */
+  --mvmt-display:  none; /* 移動ボタン(←↓→)表示 */
+  --jump-display:  none; /* 親指用ジャンプ(↑)ボタン表示 */
+  --log-display:   flex; /* 下部入力履歴ログエリアの表示 */
+
+  /* レバー位置（サブボタン非表示の分、少し右［ボタン側］へ寄せる） */
+  --pos-lever-left: 150px;
+
+  /* 攻撃ボタン（上段3ボタン表示・弱Pのみ一段下げた配置、L1 は非表示） */
+  --disp-btn-02: flex; --pos-btn-02-top: 92px; --pos-btn-02-left: 327px; /* Btn 02 (LP) */
+  --disp-btn-03: flex; --pos-btn-03-top: 78px; --pos-btn-03-left: 389px; /* Btn 03 (MP) */
+  --disp-btn-05: flex; --pos-btn-05-top: 78px; --pos-btn-05-left: 453px; /* Btn 05 (HP) */
+  --disp-btn-04: none; /* Btn 04 (L1) */
+
+  /* 攻撃ボタン（下段3ボタン表示・弱Kのみ一段下げた配置、L2 は非表示） */
+  --disp-btn-00: flex; --pos-btn-00-top: 156px; --pos-btn-00-left: 315px; /* Btn 00 (LK) */
+  --disp-btn-01: flex; --pos-btn-01-top: 142px; --pos-btn-01-left: 377px; /* Btn 01 (MK) */
+  --disp-btn-07: flex; --pos-btn-07-top: 142px; --pos-btn-07-left: 441px; /* Btn 07 (HK) */
+  --disp-btn-06: none; /* Btn 06 (L2) */
+
+  /* サブボタン（L3 / R3 を非表示） */
+  --disp-btn-10: none; /* Btn 10 (L3) */
+  --disp-btn-11: none; /* Btn 11 (R3) */
+}

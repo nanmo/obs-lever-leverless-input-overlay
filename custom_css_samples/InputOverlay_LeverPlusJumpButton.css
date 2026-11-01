@@ -1,0 +1,10 @@
+/*
+ * OBS ブラウザソース「カスタムCSS」用設定サンプル：レバー＋親指ジャンプボタン構成
+ * License: 0BSD (SPDX-License-Identifier: 0BSD)
+ */
+:root {
+  --lever-display: flex; /* レバー本体の表示 (flex / none) */
+  --mvmt-display:  none; /* 移動ボタン(←↓→)表示 */
+  --jump-display:  flex; /* 親指用ジャンプ(↑)ボタン表示 */
+  --log-display:   flex; /* 下部入力履歴ログエリアの表示 */
+}

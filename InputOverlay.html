@@ -419,30 +419,11 @@
     return document.getElementById(`btn-${pfx2}`) || document.getElementById(`btn-${idx}`);
   }
 
-  const rootStyle = getComputedStyle(document.documentElement);
   const btnIndices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-
   const modeDisplayEl = document.getElementById('mode-display');
-  const isLever = rootStyle.getPropertyValue('--lever-display').trim() === 'flex';
-  const isMvmt  = rootStyle.getPropertyValue('--mvmt-display').trim() === 'flex';
-  const isJump  = rootStyle.getPropertyValue('--jump-display').trim() === 'flex';
 
-  let ctrlModeText = "CUSTOM";
-  if (isLever && !isMvmt && !isJump) {
-    ctrlModeText = "LEVER";
-  } else if (isLever && isJump) {
-    ctrlModeText = "LEVER + JUMP";
-  } else if (!isLever && isMvmt) {
-    ctrlModeText = "LEVERLESS (ALL-BUTTON)";
-  }
-
-  const gpIndexSetting = rootStyle.getPropertyValue('--gamepad-index').trim().replace(/^"|"$/g, '');
-  const targetGamepadIndex = (/^\d+$/.test(gpIndexSetting)) ? parseInt(gpIndexSetting, 10) : null;
-
-  if (modeDisplayEl) {
-    const idSuffix = (targetGamepadIndex !== null) ? ` (ID: ${targetGamepadIndex})` : '';
-    modeDisplayEl.textContent = `MODE: ${ctrlModeText}${idSuffix}`;
-  }
+  let isJump = false;
+  let targetGamepadIndex = null;
 
   function applyLabelAndAdjustSize(el, label) {
     if (!el || !label) return;
@@ -457,23 +438,68 @@
     }
   }
 
-  for (let i = 0; i < btnIndices.length; i++) {
-    const idx = btnIndices[i];
-    const el = getBtnElement(idx);
-    if (el) {
-      const varName = (idx === 12) ? '--label-jump' : `--label-btn-${String(idx).padStart(2, '0')}`;
-      let label = rootStyle.getPropertyValue(varName).trim().replace(/^"|"$/g, '');
-      if (!label && idx !== 12) {
-        label = rootStyle.getPropertyValue(`--label-btn-${idx}`).trim().replace(/^"|"$/g, '');
-      }
-      if (label) applyLabelAndAdjustSize(el, label);
+  function applyConfigFromCSS() {
+    const rootStyle = getComputedStyle(document.documentElement);
+    const isLever = rootStyle.getPropertyValue('--lever-display').trim() === 'flex';
+    const isMvmt  = rootStyle.getPropertyValue('--mvmt-display').trim() === 'flex';
+    isJump        = rootStyle.getPropertyValue('--jump-display').trim() === 'flex';
+
+    let ctrlModeText = "CUSTOM";
+    if (isLever && !isMvmt && !isJump) {
+      ctrlModeText = "LEVER";
+    } else if (isLever && isJump) {
+      ctrlModeText = "LEVER + JUMP";
+    } else if (!isLever && isMvmt) {
+      ctrlModeText = "LEVERLESS (ALL-BUTTON)";
     }
+
+    const gpIndexSetting = rootStyle.getPropertyValue('--gamepad-index').trim().replace(/^"|"$/g, '');
+    targetGamepadIndex = (/^\d+$/.test(gpIndexSetting)) ? parseInt(gpIndexSetting, 10) : null;
+
+    if (modeDisplayEl) {
+      const idSuffix = (targetGamepadIndex !== null) ? ` (ID: ${targetGamepadIndex})` : '';
+      modeDisplayEl.textContent = `MODE: ${ctrlModeText}${idSuffix}`;
+    }
+
+    for (let i = 0; i < btnIndices.length; i++) {
+      const idx = btnIndices[i];
+      const el = getBtnElement(idx);
+      if (el) {
+        const varName = (idx === 12) ? '--label-jump' : `--label-btn-${String(idx).padStart(2, '0')}`;
+        let label = rootStyle.getPropertyValue(varName).trim().replace(/^"|"$/g, '');
+        if (!label && idx !== 12) {
+          label = rootStyle.getPropertyValue(`--label-btn-${idx}`).trim().replace(/^"|"$/g, '');
+        }
+        if (label) applyLabelAndAdjustSize(el, label);
+      }
+    }
+
+    const isIndividualEnabled = rootStyle.getPropertyValue('--btn-individual-color-enable').trim() === '1';
+    document.body.classList.toggle('individual-colors-on', isIndividualEnabled);
   }
 
-  const isIndividualEnabled = rootStyle.getPropertyValue('--btn-individual-color-enable').trim() === '1';
-  if (isIndividualEnabled) {
-    document.body.classList.add('individual-colors-on');
-  }
+  applyConfigFromCSS();
+  window.addEventListener('load', applyConfigFromCSS);
+
+  const styleObserver = new MutationObserver((mutations) => {
+    for (let i = 0; i < mutations.length; i++) {
+      const m = mutations[i];
+      if (m.target && m.target.nodeName === 'STYLE') {
+        applyConfigFromCSS();
+        return;
+      }
+      if (m.addedNodes) {
+        for (let j = 0; j < m.addedNodes.length; j++) {
+          const n = m.addedNodes[j];
+          if (n.nodeName === 'STYLE' || n.nodeName === 'LINK') {
+            applyConfigFromCSS();
+            return;
+          }
+        }
+      }
+    }
+  });
+  styleObserver.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
 
   const leverBall = document.getElementById('lever-ball');
   const inputLog  = document.getElementById('input-log');
@@ -562,7 +588,7 @@
           if (i >= 12 && i <= 15) continue;
 
           const el = getBtnElement(i);
-          if (el) {
+          if (el && getComputedStyle(el).display !== 'none') {
             const lbl = el.getAttribute('data-label') || String(i);
             if (!activeBtns.includes(lbl)) {
               activeBtns.push(lbl);

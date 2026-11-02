@@ -1,14 +1,24 @@
 /*
  * OBS ブラウザソース「カスタムCSS」用設定サンプル：レガシーレバーレス（12ボタン）構成
  * （L3/R3 の増設ボタンを非表示にし、←・↓・→・↑ の位置を調整した配置）
+ * ※サンプル間のフォーマット統一および表示切替時の座標保持のため、非表示要素の座標も記載しています。
  * License: 0BSD (SPDX-License-Identifier: 0BSD)
  */
 :root {
-  --lever-display: none; /* レバー本体の表示 (flex / none) */
+  /* モード・表示切替 */
+  --lever-display: none; /* レバー本体の表示（※本構成では非表示） */
   --mvmt-display:  flex; /* 移動ボタン(←↓→)表示 */
   --jump-display:  flex; /* 親指用ジャンプ(↑)ボタン表示 */
   --mode-display:  flex; /* 左上モード表示バッジの表示 */
   --log-display:   flex; /* 下部入力履歴ログエリアの表示 */
+
+  /* ボタンサイズ */
+  --size-btn-main: 62px; /* 標準ボタンサイズ (攻撃, L3/R3) */
+  --size-btn-sys:  48px; /* VIEW / MENU ボタンサイズ */
+  --size-btn-jump: 62px; /* 親指ジャンプボタンサイズ */
+
+  /* レバー位置（※本構成では --lever-display が none のため非表示） */
+  --pos-lever-top: 87px;  --pos-lever-left: 120px; /* レバー本体（※非表示） */
 
   /* 移動ボタン位置（←・↓ が上段に並び、人差し指の → が一段下がり、↑ が中央下寄りの配置） */
   --pos-btn-14-top: 102px; --pos-btn-14-left: 88px;  /* Btn 14 (移動←) */
@@ -16,7 +26,23 @@
   --pos-btn-15-top: 132px; --pos-btn-15-left: 208px; /* Btn 15 (移動→) */
   --pos-jump-top:   196px; --pos-jump-left:   245px; /* Btn 12 (移動↑ / ジャンプ) */
 
-  /* サブボタン（増設 L3 / R3 を非表示） */
-  --disp-btn-10: none; /* Btn 10 (L3) */
-  --disp-btn-11: none; /* Btn 11 (R3) */
+  /* 攻撃ボタン位置・表示（上段） */
+  --disp-btn-02: flex; --pos-btn-02-top: 78px; --pos-btn-02-left: 325px; /* Btn 02 (LP) */
+  --disp-btn-03: flex; --pos-btn-03-top: 78px; --pos-btn-03-left: 389px; /* Btn 03 (MP) */
+  --disp-btn-05: flex; --pos-btn-05-top: 78px; --pos-btn-05-left: 453px; /* Btn 05 (HP) */
+  --disp-btn-04: flex; --pos-btn-04-top: 78px; --pos-btn-04-left: 517px; /* Btn 04 (L1) */
+
+  /* 攻撃ボタン位置・表示（下段） */
+  --disp-btn-00: flex; --pos-btn-00-top: 142px; --pos-btn-00-left: 313px; /* Btn 00 (LK) */
+  --disp-btn-01: flex; --pos-btn-01-top: 142px; --pos-btn-01-left: 377px; /* Btn 01 (MK) */
+  --disp-btn-07: flex; --pos-btn-07-top: 142px; --pos-btn-07-left: 441px; /* Btn 07 (HK) */
+  --disp-btn-06: flex; --pos-btn-06-top: 142px; --pos-btn-06-left: 505px; /* Btn 06 (L2) */
+
+  /* サブ・機能系ボタン位置・表示（※本構成では増設 L3 / R3 は none で非表示） */
+  --disp-btn-10: none; --pos-btn-10-top: 110px; --pos-btn-10-left: 257px; /* Btn 10 (L3 ※非表示) */
+  --disp-btn-11: none; --pos-btn-11-top: 210px; --pos-btn-11-left: 286px; /* Btn 11 (R3 ※非表示) */
+
+  /* システム系ボタン位置・表示 */
+  --disp-btn-08: flex; --pos-btn-08-top: 40px; --pos-btn-08-left: 60px;  /* Btn 08 (View) */
+  --disp-btn-09: flex; --pos-btn-09-top: 40px; --pos-btn-09-left: 116px; /* Btn 09 (Menu) */
 }

@@ -33,7 +33,8 @@
     --lever-display: flex; /* レバー本体の表示 (flex / none) */
     --mvmt-display:  none; /* 移動ボタン(←↓→)表示 ※レバーレス構成で使用 */
     --jump-display:  flex; /* 親指用ジャンプ(↑)ボタン表示 ※レバーモード時に追加表示すると、レバーの上方向が入らない表示になります */
-    --log-display:   flex; /* 下部入力履歴ログエリアの表示 */
+    --mode-display:  flex; /* 左上モード表示バッジの表示 (flex / none) */
+    --log-display:   flex; /* 下部入力履歴ログエリアの表示 (flex / none) */
 
     /* ------------------------------------------------------
        2. ボタン表示名設定 (data-label への代入テキスト)
@@ -201,6 +202,7 @@
 
   /* モード表示バッジ */
   #mode-display {
+    display: var(--mode-display);
     position: absolute;
     top: 15px;
     left: 20px;

@@ -65,6 +65,7 @@ OBS Studioのブラウザソースや一般的なWebブラウザ上で動作す�
 | **レバー＋ジャンプボタン** | `flex` | `none` | `flex` | `MODE: LEVER + JUMP` | `mode_samples/InputOverlay_LeverPlusJumpButton.html` |
 | **レバーレス** | `none` | `flex` | `flex` | `MODE: LEVERLESS (ALL-BUTTON)` | `mode_samples/InputOverlay_Leverless.html` |
 
+- `--mode-display` を `none` にすると、左上のモード表示バッジ（`MODE: LEVER` など）を非表示にできます。
 - `--log-display` を `none` にすると、下部の入力履歴ログを非表示にできます。
 - `mode_samples/` ディレクトリ内に、あらかじめ「レバー＋ジャンプボタン」「レバーレス」に設定済みのサンプルファイルを同梱しています。そのままOBSに読み込ませて使用することも可能です。
 

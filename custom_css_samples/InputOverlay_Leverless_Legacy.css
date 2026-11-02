@@ -7,6 +7,7 @@
   --lever-display: none; /* レバー本体の表示 (flex / none) */
   --mvmt-display:  flex; /* 移動ボタン(←↓→)表示 */
   --jump-display:  flex; /* 親指用ジャンプ(↑)ボタン表示 */
+  --mode-display:  flex; /* 左上モード表示バッジの表示 */
   --log-display:   flex; /* 下部入力履歴ログエリアの表示 */
 
   /* 移動ボタン位置（←・↓ が上段に並び、人差し指の → が一段下がり、↑ が中央下寄りの配置） */

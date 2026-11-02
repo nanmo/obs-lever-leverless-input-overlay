@@ -1,0 +1,32 @@
+# GitHubのWeb画面からリリースを公開（Publish release）した際に、
+# 配布対象のHTMLファイル3種を自動的にそのリリースへ添付するワークフローです。
+name: Release
+
+on:
+  release:
+    # リリースが公開（published）されたタイミングで実行
+    types: [published]
+
+permissions:
+  # リリースへのファイル添付（アップロード）に必要な書き込み権限を付与
+  contents: write
+
+jobs:
+  upload-assets:
+    runs-on: ubuntu-latest
+    steps:
+      # リポジトリのファイルを取得
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # GitHub CLI (gh) を使用して、公開されたリリースにHTMLファイル3種を添付
+      # ※ --clobber は同名ファイルが既に添付されていた場合に上書きするオプション
+      - name: Attach Files to Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            InputOverlay.html \
+            mode_samples/InputOverlay_LeverPlusJumpButton.html \
+            mode_samples/InputOverlay_Leverless.html \
+            --clobber

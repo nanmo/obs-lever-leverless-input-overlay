@@ -1,5 +1,15 @@
 # obs-lever-leverless-input-overlay
 
+---
+
+<details>
+<summary><sub>管理用メモ（リリース作成手順）</sub></summary>
+
+> <sub>GitHubの「Releases」→「Draft a new release」から新しいタグ（`v1.0.0` 等）を作成して「Publish release」を実行すると、GitHub Actions（`.github/workflows/release.yml`）によってHTMLファイル3種が自動で添付されます（手動でのファイル添付は不要）。</sub>
+</details>
+
+---
+
 OBS Studioのブラウザソースや一般的なWebブラウザ上で動作する、格闘ゲーム（ストリートファイター6など）向けのコントローラー入力可視化オーバーレイです。
 
 外部ライブラリや画像アセットに依存しない**単一HTMLファイル（`InputOverlay.html`）完結型**で、ファイル先頭のCSS変数の書き換え、または**OBSのブラウザソースの「カスタムCSS」欄からの設定上書き**によって、**レバー（アケコン）** / **レバー＋親指ジャンプボタン** / **レバーレス（オールボタン）** の切り替えや、ボタン配置・ラベル・配色のカスタマイズが可能です。

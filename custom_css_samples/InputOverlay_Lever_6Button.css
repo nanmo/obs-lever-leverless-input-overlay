@@ -12,10 +12,27 @@
   --mode-display:  flex; /* 左上モード表示バッジの表示 */
   --log-display:   flex; /* 下部入力履歴ログエリアの表示 */
 
-  /* ボタンサイズ */
-  --size-btn-main: 62px; /* 標準ボタンサイズ (攻撃, L3/R3) */
-  --size-btn-sys:  48px; /* VIEW / MENU ボタンサイズ */
-  --size-btn-jump: 62px; /* 親指ジャンプボタンサイズ */
+  /* ボタン表示名設定 */
+  --label-btn-14: "←";  /* Btn 14 (移動←) */
+  --label-btn-13: "↓";  /* Btn 13 (↓) */
+  --label-btn-15: "→";  /* Btn 15 (移動→) */
+  --label-jump:   "↑";  /* Btn 12 (移動↑ / ジャンプ) */
+
+  --label-btn-02: "LP"; /* Btn 02 (LP) */
+  --label-btn-03: "MP"; /* Btn 03 (MP) */
+  --label-btn-05: "HP"; /* Btn 05 (HP) */
+  --label-btn-04: "L1"; /* Btn 04 (L1) */
+
+  --label-btn-00: "LK"; /* Btn 00 (LK) */
+  --label-btn-01: "MK"; /* Btn 01 (MK) */
+  --label-btn-07: "HK"; /* Btn 07 (HK) */
+  --label-btn-06: "L2"; /* Btn 06 (L2) */
+
+  --label-btn-10: "L3"; /* Btn 10 (L3) */
+  --label-btn-11: "R3"; /* Btn 11 (R3) */
+
+  --label-btn-08: "VIEW"; /* Btn 08 (VIEW) */
+  --label-btn-09: "MENU"; /* Btn 09 (MENU) */
 
   /* レバー位置（サブボタン非表示の分、少し右［ボタン側］へ寄せる） */
   --pos-lever-top: 87px;  --pos-lever-left: 150px; /* レバー本体 */

@@ -449,8 +449,16 @@
   let leverStroke = 34;
 
 
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
   function applyLabelAndAdjustSize(el, label) {
-    if (!el || !label) return;
+    if (!el || label === null || label === undefined) return;
     el.setAttribute('data-label', label);
 
     const len = label.length;
@@ -471,9 +479,9 @@
     let ctrlModeText = "CUSTOM";
     if (isLever && !isMvmt && !isJump) {
       ctrlModeText = "LEVER";
-    } else if (isLever && isJump) {
+    } else if (isLever && !isMvmt && isJump) {
       ctrlModeText = "LEVER + JUMP";
-    } else if (!isLever && isMvmt) {
+    } else if (!isLever && isMvmt && isJump) {
       ctrlModeText = "LEVERLESS (ALL-BUTTON)";
     }
 
@@ -490,11 +498,14 @@
       const el = getBtnElement(idx);
       if (el) {
         const varName = (idx === 12) ? '--label-jump' : `--label-btn-${String(idx).padStart(2, '0')}`;
-        let label = rootStyle.getPropertyValue(varName).trim().replace(/^"|"$/g, '');
-        if (!label && idx !== 12) {
-          label = rootStyle.getPropertyValue(`--label-btn-${idx}`).trim().replace(/^"|"$/g, '');
+        let rawLabel = rootStyle.getPropertyValue(varName).trim();
+        if (!rawLabel && idx !== 12) {
+          rawLabel = rootStyle.getPropertyValue(`--label-btn-${idx}`).trim();
         }
-        if (label) applyLabelAndAdjustSize(el, label);
+        if (rawLabel) {
+          const label = rawLabel.replace(/^['"]|['"]$/g, '').replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+          applyLabelAndAdjustSize(el, label);
+        }
       }
     }
 
@@ -512,7 +523,7 @@
   const styleObserver = new MutationObserver((mutations) => {
     for (let i = 0; i < mutations.length; i++) {
       const m = mutations[i];
-      if (m.target && m.target.nodeName === 'STYLE') {
+      if (m.target && (m.target.nodeName === 'STYLE' || (m.target.parentNode && m.target.parentNode.nodeName === 'STYLE'))) {
         applyConfigFromCSS();
         return;
       }
@@ -520,6 +531,9 @@
         for (let j = 0; j < m.addedNodes.length; j++) {
           const n = m.addedNodes[j];
           if (n.nodeName === 'STYLE' || n.nodeName === 'LINK') {
+            if (n.nodeName === 'LINK') {
+              n.addEventListener('load', applyConfigFromCSS, { once: true });
+            }
             applyConfigFromCSS();
             return;
           }
@@ -630,7 +644,7 @@
       if (currentStateStr !== lastStateStr && currentStateStr !== "") {
         logHistory.unshift(currentStateStr);
         if (logHistory.length > 25) logHistory.pop();
-        inputLog.innerHTML = logHistory.map(s => `<span class="log-item">${s}</span>`).join('');
+        inputLog.innerHTML = logHistory.map(s => `<span class="log-item">${escapeHtml(s)}</span>`).join('');
         lastStateStr = currentStateStr;
       } else if (currentStateStr === "") {
         lastStateStr = "";

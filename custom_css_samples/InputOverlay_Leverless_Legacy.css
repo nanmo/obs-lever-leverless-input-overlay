@@ -34,7 +34,31 @@
   --label-btn-08: "VIEW"; /* Btn 08 (VIEW) */
   --label-btn-09: "MENU"; /* Btn 09 (MENU) */
 
+  /* ボタンサイズ設定 (個別数値指定) */
+  --size-btn-14: 62px; /* Btn 14 (移動←) */
+  --size-btn-13: 62px; /* Btn 13 (↓) */
+  --size-btn-15: 62px; /* Btn 15 (移動→) */
+  --size-jump:   62px; /* Btn 12 (移動↑ / ジャンプ) */
+
+  --size-btn-02: 62px; /* Btn 02 (LP) */
+  --size-btn-03: 62px; /* Btn 03 (MP) */
+  --size-btn-05: 62px; /* Btn 05 (HP) */
+  --size-btn-04: 62px; /* Btn 04 (L1) */
+
+  --size-btn-00: 62px; /* Btn 00 (LK) */
+  --size-btn-01: 62px; /* Btn 01 (MK) */
+  --size-btn-07: 62px; /* Btn 07 (HK) */
+  --size-btn-06: 62px; /* Btn 06 (L2) */
+
+  --size-btn-10: 62px; /* Btn 10 (L3) */
+  --size-btn-11: 62px; /* Btn 11 (R3) */
+
+  --size-btn-08: 48px; /* Btn 08 (VIEW) */
+  --size-btn-09: 48px; /* Btn 09 (MENU) */
+
   /* レバー位置（※本構成では --lever-display が none のため非表示） */
+  --size-lever:      116px; /* レバー土台（ガイド円）サイズ */
+  --size-lever-ball: 52px;  /* レバー玉サイズ */
   --pos-lever-top: 87px;  --pos-lever-left: 120px; /* レバー本体（※非表示） */
 
   /* 移動ボタン位置（←・↓ が上段に並び、人差し指の → が一段下がり、↑ が中央下寄りの配置） */

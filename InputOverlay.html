@@ -74,13 +74,33 @@
     /* ------------------------------------------------------
        3. 各要素の配置座標・サイズ設定 (単位: px / flex or none)
        ------------------------------------------------------ */
-    /* ボタンサイズ */
-    --size-btn-main: 62px; /* 標準ボタンサイズ (攻撃, L3/R3) */
-    --size-btn-sys:  48px; /* VIEW / MENU ボタンサイズ */
-    --size-btn-jump: 62px; /* 親指ジャンプボタンサイズ */
+    /* ボタンサイズ（個別指定、標準62px / システム48px） */
+    --size-btn-14: 62px;
+    --size-btn-13: 62px;
+    --size-btn-15: 62px;
+    --size-jump:   62px;
 
-    /* レバー・移動ボタン位置 */
-    --pos-lever-top: 87px;  --pos-lever-left: 120px; /* レバー本体 */
+    --size-btn-02: 62px;
+    --size-btn-03: 62px;
+    --size-btn-05: 62px;
+    --size-btn-04: 62px;
+
+    --size-btn-00: 62px;
+    --size-btn-01: 62px;
+    --size-btn-07: 62px;
+    --size-btn-06: 62px;
+
+    --size-btn-10: 62px;
+    --size-btn-11: 62px;
+
+    --size-btn-08: 48px;
+    --size-btn-09: 48px;
+
+
+    /* レバーサイズ・位置 */
+    --size-lever:      116px; /* レバー土台（ガイド円）サイズ */
+    --size-lever-ball: 52px;  /* レバー玉サイズ */
+    --pos-lever-top:   87px;  --pos-lever-left: 120px; /* レバー本体 */
 
     /* 左下移動ボタン位置・表示 */
     --pos-btn-14-top: 135px; --pos-btn-14-left: 69px;  /* Btn 14 (移動←) */
@@ -222,8 +242,8 @@
      ------------------------------------------------------ */
   .btn {
     position: absolute;
-    width: var(--size-btn-main);
-    height: var(--size-btn-main);
+    width: var(--btn-size, 62px);
+    height: var(--btn-size, 62px);
     border-radius: 50%;
     border: 2px solid var(--btn-border-color);
     background-color: var(--btn-bg-color);
@@ -232,7 +252,7 @@
     align-items: center;
     justify-content: center;
     font-weight: bold;
-    font-size: 22px;
+    font-size: calc(var(--btn-size, 62px) * 0.35);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     transition: background-color 0.05s, transform 0.05s, border-color 0.05s;
   }
@@ -248,14 +268,14 @@
   }
 
   /* 文字数に応じたフォントサイズ自動調整 */
-  .btn.text-long  { font-size: 15px; } /* 3〜4文字 */
-  .btn.text-xlong { font-size: 12px; } /* 5文字以上 */
+  .btn.text-long  { font-size: calc(var(--btn-size, 62px) * 0.24); } /* 3〜4文字 */
+  .btn.text-xlong { font-size: calc(var(--btn-size, 62px) * 0.19); } /* 5文字以上 */
 
   /* 特殊ボタンサイズ・フォント */
-  .btn-sys { width: var(--size-btn-sys); height: var(--size-btn-sys); font-size: 13px; }
-  .btn-sys.text-long  { font-size: 11px; } /* VIEW / MENU 等の4文字表記が収まるよう最適化 */
-  .btn-sys.text-xlong { font-size: 9px; }
-  .btn-jump { width: var(--size-btn-jump); height: var(--size-btn-jump); }
+  .btn-sys { width: var(--btn-size, 48px); height: var(--btn-size, 48px); }
+
+
+  .btn-jump { width: var(--btn-size, var(--size-jump, 62px)); height: var(--btn-size, var(--size-jump, 62px)); }
 
   /* モード依存の表示切替 */
   .mode-lever { display: var(--lever-display); align-items: center; justify-content: center; }
@@ -264,22 +284,22 @@
   .mode-log   { display: var(--log-display); align-items: center; }
 
   /* 位置指定マッピング */
-  #btn-08, #btn-8 { display: var(--disp-btn-08); top: var(--pos-btn-08-top); left: var(--pos-btn-08-left); }
-  #btn-09, #btn-9 { display: var(--disp-btn-09); top: var(--pos-btn-09-top); left: var(--pos-btn-09-left); }
-  #btn-14         { top: var(--pos-btn-14-top); left: var(--pos-btn-14-left); }
-  #btn-13         { top: var(--pos-btn-13-top); left: var(--pos-btn-13-left); }
-  #btn-15         { top: var(--pos-btn-15-top); left: var(--pos-btn-15-left); }
-  #btn-12         { top: var(--pos-jump-top);   left: var(--pos-jump-left); }
-  #btn-10         { display: var(--disp-btn-10); top: var(--pos-btn-10-top); left: var(--pos-btn-10-left); }
-  #btn-11         { display: var(--disp-btn-11); top: var(--pos-btn-11-top); left: var(--pos-btn-11-left); }
-  #btn-02, #btn-2 { display: var(--disp-btn-02); top: var(--pos-btn-02-top); left: var(--pos-btn-02-left); }
-  #btn-03, #btn-3 { display: var(--disp-btn-03); top: var(--pos-btn-03-top); left: var(--pos-btn-03-left); }
-  #btn-05, #btn-5 { display: var(--disp-btn-05); top: var(--pos-btn-05-top); left: var(--pos-btn-05-left); }
-  #btn-04, #btn-4 { display: var(--disp-btn-04); top: var(--pos-btn-04-top); left: var(--pos-btn-04-left); }
-  #btn-00, #btn-0 { display: var(--disp-btn-00); top: var(--pos-btn-00-top); left: var(--pos-btn-00-left); }
-  #btn-01, #btn-1 { display: var(--disp-btn-01); top: var(--pos-btn-01-top); left: var(--pos-btn-01-left); }
-  #btn-07, #btn-7 { display: var(--disp-btn-07); top: var(--pos-btn-07-top); left: var(--pos-btn-07-left); }
-  #btn-06, #btn-6 { display: var(--disp-btn-06); top: var(--pos-btn-06-top); left: var(--pos-btn-06-left); }
+  #btn-08, #btn-8 { --btn-size: var(--size-btn-08, 48px); display: var(--disp-btn-08); top: var(--pos-btn-08-top); left: var(--pos-btn-08-left); }
+  #btn-09, #btn-9 { --btn-size: var(--size-btn-09, 48px); display: var(--disp-btn-09); top: var(--pos-btn-09-top); left: var(--pos-btn-09-left); }
+  #btn-14         { --btn-size: var(--size-btn-14, 62px); top: var(--pos-btn-14-top); left: var(--pos-btn-14-left); }
+  #btn-13         { --btn-size: var(--size-btn-13, 62px); top: var(--pos-btn-13-top); left: var(--pos-btn-13-left); }
+  #btn-15         { --btn-size: var(--size-btn-15, 62px); top: var(--pos-btn-15-top); left: var(--pos-btn-15-left); }
+  #btn-12         { --btn-size: var(--size-jump, 62px);   top: var(--pos-jump-top);   left: var(--pos-jump-left); }
+  #btn-10         { --btn-size: var(--size-btn-10, 62px); display: var(--disp-btn-10); top: var(--pos-btn-10-top); left: var(--pos-btn-10-left); }
+  #btn-11         { --btn-size: var(--size-btn-11, 62px); display: var(--disp-btn-11); top: var(--pos-btn-11-top); left: var(--pos-btn-11-left); }
+  #btn-02, #btn-2 { --btn-size: var(--size-btn-02, 62px); display: var(--disp-btn-02); top: var(--pos-btn-02-top); left: var(--pos-btn-02-left); }
+  #btn-03, #btn-3 { --btn-size: var(--size-btn-03, 62px); display: var(--disp-btn-03); top: var(--pos-btn-03-top); left: var(--pos-btn-03-left); }
+  #btn-05, #btn-5 { --btn-size: var(--size-btn-05, 62px); display: var(--disp-btn-05); top: var(--pos-btn-05-top); left: var(--pos-btn-05-left); }
+  #btn-04, #btn-4 { --btn-size: var(--size-btn-04, 62px); display: var(--disp-btn-04); top: var(--pos-btn-04-top); left: var(--pos-btn-04-left); }
+  #btn-00, #btn-0 { --btn-size: var(--size-btn-00, 62px); display: var(--disp-btn-00); top: var(--pos-btn-00-top); left: var(--pos-btn-00-left); }
+  #btn-01, #btn-1 { --btn-size: var(--size-btn-01, 62px); display: var(--disp-btn-01); top: var(--pos-btn-01-top); left: var(--pos-btn-01-left); }
+  #btn-07, #btn-7 { --btn-size: var(--size-btn-07, 62px); display: var(--disp-btn-07); top: var(--pos-btn-07-top); left: var(--pos-btn-07-left); }
+  #btn-06, #btn-6 { --btn-size: var(--size-btn-06, 62px); display: var(--disp-btn-06); top: var(--pos-btn-06-top); left: var(--pos-btn-06-left); }
 
   /* 個別カラー適用 */
   body.individual-colors-on #btn-14 { background-color: var(--btn-14-bg); }
@@ -326,15 +346,15 @@
     position: absolute;
     top: var(--pos-lever-top);
     left: var(--pos-lever-left);
-    width: 116px;
-    height: 116px;
+    width: var(--size-lever, 116px);
+    height: var(--size-lever, 116px);
     border-radius: 50%;
     background: var(--lever-base-bg);
     border: 2px dashed var(--lever-base-border);
   }
   #lever-ball {
-    width: 52px;
-    height: 52px;
+    width: var(--size-lever-ball, 52px);
+    height: var(--size-lever-ball, 52px);
     border-radius: 50%;
     background: radial-gradient(circle at 35% 35%, var(--lever-ball-color-1), var(--lever-ball-color-2));
     border: 2px solid var(--lever-ball-border);
@@ -426,6 +446,8 @@
 
   let isJump = false;
   let targetGamepadIndex = null;
+  let leverStroke = 34;
+
 
   function applyLabelAndAdjustSize(el, label) {
     if (!el || !label) return;
@@ -478,6 +500,10 @@
 
     const isIndividualEnabled = rootStyle.getPropertyValue('--btn-individual-color-enable').trim() === '1';
     document.body.classList.toggle('individual-colors-on', isIndividualEnabled);
+
+    const baseSize = parseFloat(rootStyle.getPropertyValue('--size-lever')) || 116;
+    const ballSize = parseFloat(rootStyle.getPropertyValue('--size-lever-ball')) || 52;
+    leverStroke = Math.round((baseSize - ballSize) / 2 + 2);
   }
 
   applyConfigFromCSS();
@@ -505,6 +531,7 @@
 
   const leverBall = document.getElementById('lever-ball');
   const inputLog  = document.getElementById('input-log');
+
 
   let logHistory = [];
   let lastStateStr = "";
@@ -570,7 +597,7 @@
 
       if (leverBall) {
         const leverRy = (isJump && ry < 0) ? 0 : ry;
-        leverBall.style.transform = `translate(${rx * 34}px, ${leverRy * 34}px)`;
+        leverBall.style.transform = `translate(${rx * leverStroke}px, ${leverRy * leverStroke}px)`;
       }
 
       const activeBtns = [];

@@ -1,0 +1,44 @@
+# mainブランチへのプッシュ時（または手動実行時）に、
+# tenban_layout_san ディレクトリをルートとして GitHub Pages に自動デプロイするワークフローです。
+name: Deploy Tenban Layout to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'tenban_layout_san/**'
+      - '.github/workflows/deploy-pages.yml'
+  workflow_dispatch: # Actions画面からの手動実行も可能
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      # tenban_layout_san フォルダを公開サイトのルートとしてアーティファクト化
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'tenban_layout_san'
+
+      # GitHub Pages へデプロイ
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,2368 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>天板レイアウトさん - for obs-lever-leverless-input-overlay</title>
+  <meta name="description" content="obs-lever-leverless-input-overlay用レイアウト調整・カスタムCSS作成ツール">
+  <meta property="og:title" content="天板レイアウトさん">
+  <meta property="og:description" content="obs-lever-leverless-input-overlay用レイアウト調整・カスタムCSS作成ツール">
+  <meta name="twitter:card" content="summary">
+  <style>
+    /*
+     * =================================================================
+     * 天板レイアウトさん - for obs-lever-leverless-input-overlay
+     * License: 0BSD (SPDX-License-Identifier: 0BSD)
+     * Copyright (C) 2026 Nanmo
+     * =================================================================
+     */
+
+    /* ========================================================
+       ベースUIスタイル（エディター共通）
+       ======================================================== */
+    :root {
+      --ui-bg: #141419;
+      --ui-panel-bg: #1e1e28;
+      --ui-panel-header: #262634;
+      --ui-panel-border: #323246;
+      --ui-text: #e6e6f0;
+      --ui-text-dim: #9090a8;
+      --ui-accent: #00d2ff;
+      --ui-accent-hover: #33dcff;
+      --ui-active-item: rgba(0, 210, 255, 0.15);
+      --ui-active-border: #00d2ff;
+      --ui-warning: #ffb84d;
+      --ui-danger: #ff5252;
+      --ui-success: #4cd964;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--ui-bg);
+      color: var(--ui-text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ヘッダーエリア */
+    header {
+      background: var(--ui-panel-bg);
+      border-bottom: 1px solid var(--ui-panel-border);
+      padding: 8px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .title-main-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+    .title-group h1 {
+      font-size: 26px;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: 0.8px;
+      line-height: 1.1;
+    }
+    .version-badge {
+      font-size: 11px;
+      font-weight: bold;
+      color: var(--ui-accent);
+      background: rgba(0, 210, 255, 0.15);
+      border: 1px solid rgba(0, 210, 255, 0.4);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: monospace;
+      letter-spacing: 0.5px;
+    }
+    .title-group .subtitle {
+      font-size: 13px;
+      color: var(--ui-text-dim);
+      font-family: monospace;
+    }
+    .title-group .subtitle a {
+      color: var(--ui-accent);
+      text-decoration: none;
+      transition: color 0.15s, text-decoration 0.15s;
+    }
+    .title-group .subtitle a:hover {
+      color: var(--ui-accent-hover);
+      text-decoration: underline;
+    }
+    .title-notice {
+      font-size: 11px;
+      color: var(--ui-warning);
+      font-weight: normal;
+      margin-top: 1px;
+    }
+
+    /* ツール設定エリア */
+    .tool-settings {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--ui-panel-border);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+    .tool-settings-header {
+      font-weight: bold;
+      color: var(--ui-accent);
+      font-size: 11px;
+      letter-spacing: 0.5px;
+    }
+    .tool-settings-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .tool-settings label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .tool-settings select {
+      background: #111116;
+      color: #fff;
+      border: 1px solid var(--ui-panel-border);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .zoom-warning {
+      color: var(--ui-warning);
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    /* メイン3ペインレイアウト */
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 330px 1fr 320px;
+      gap: 12px;
+      padding: 10px 18px;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .pane {
+      background: var(--ui-panel-bg);
+      border: 1px solid var(--ui-panel-border);
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+    }
+    .pane-header {
+      background: var(--ui-panel-header);
+      border-bottom: 1px solid var(--ui-panel-border);
+      padding: 8px 12px;
+      font-weight: bold;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .pane-header .subtext {
+      font-size: 11px;
+      font-weight: normal;
+      color: var(--ui-text-dim);
+    }
+    .pane-body {
+      padding: 10px;
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 0;
+    }
+
+    /* 左ペイン：CSSプレビュー & アクションボタン */
+    #css-preview-textarea {
+      width: 100%;
+      flex: 1;
+      min-height: 200px;
+      background: #0d0d12;
+      color: #4cd964;
+      border: 1px solid var(--ui-panel-border);
+      border-radius: 4px;
+      font-family: Consolas, Monaco, "Courier New", monospace;
+      font-size: 11px;
+      line-height: 1.45;
+      padding: 8px 10px;
+      resize: none;
+      white-space: pre;
+      overflow: auto;
+    }
+    .css-pane-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-shrink: 0;
+      margin-top: auto;
+    }
+    .file-actions-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .file-action-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    /* 編集用に非表示ボタンを薄く表示するスタイル */
+    body.show-hidden-buttons .is-hidden-elem {
+      display: flex !important;
+      opacity: 0.35 !important;
+      border-style: dashed !important;
+      pointer-events: auto !important;
+    }
+    body.show-hidden-buttons .is-hidden-elem.editor-selected {
+      opacity: 0.95 !important;
+      outline: 3px solid #ffcc00 !important;
+    }
+
+    /* CSS拡大モーダル */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .modal-content {
+      background: var(--ui-panel-bg);
+      border: 1px solid var(--ui-panel-border);
+      border-radius: 8px;
+      width: 900px;
+      max-width: 95vw;
+      height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.9);
+      overflow: hidden;
+    }
+    .modal-header {
+      background: var(--ui-panel-header);
+      border-bottom: 1px solid var(--ui-panel-border);
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--ui-accent);
+    }
+    .modal-body {
+      flex: 1;
+      padding: 14px;
+      display: flex;
+      min-height: 0;
+    }
+    #modal-css-textarea {
+      width: 100%;
+      height: 100%;
+      background: #09090e;
+      color: #4cd964;
+      border: 1px solid var(--ui-panel-border);
+      border-radius: 6px;
+      font-family: Consolas, Monaco, "Courier New", monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      padding: 14px;
+      resize: none;
+      white-space: pre;
+      overflow: auto;
+    }
+    .modal-footer {
+      background: var(--ui-panel-header);
+      border-top: 1px solid var(--ui-panel-border);
+      padding: 10px 16px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    /* 中央ペイン：レイアウトプレビュー兼エディター */
+    .editor-pane-body {
+      background: #08080c;
+      padding: 16px;
+      overflow: auto;
+      display: flex;
+      position: relative;
+    }
+    .preview-canvas-outer {
+      margin: auto;
+      position: relative;
+      flex-shrink: 0;
+      transition: width 0.15s ease-out, height 0.15s ease-out;
+    }
+    .preview-canvas-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 640px;
+      height: 360px;
+      transform-origin: top left;
+      transition: transform 0.15s ease-out;
+      border: 2px dashed rgba(255, 255, 255, 0.25);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
+      user-select: none;
+    }
+
+    /* 右ペイン：設定エリア */
+    .section-card {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--ui-panel-border);
+      border-radius: 6px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .section-title {
+      font-size: 12px;
+      font-weight: bold;
+      color: var(--ui-accent);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 4px;
+    }
+
+    /* ラジオボタングループ */
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12px;
+    }
+    .radio-group label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    /* レバー・ボタンプロパティフォーム */
+    .btn-edit-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--ui-panel-border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: border-color 0.15s, background-color 0.15s;
+    }
+    .btn-edit-card.selected {
+      border-color: var(--ui-active-border);
+      background-color: var(--ui-active-item);
+    }
+    .btn-edit-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .btn-edit-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(0, 210, 255, 0.2);
+      color: var(--ui-accent);
+      font-family: monospace;
+      font-size: 10px;
+    }
+    .coords-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+    .coord-field {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+    }
+    .coord-field label {
+      color: var(--ui-text-dim);
+      font-family: monospace;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+    .coord-field input[type="number"],
+    .coord-field input[type="text"] {
+      width: 100%;
+      background: #111116;
+      border: 1px solid var(--ui-panel-border);
+      border-radius: 4px;
+      color: #fff;
+      padding: 3px 6px;
+      font-family: monospace;
+      font-size: 11px;
+    }
+    .coord-field input[type="number"]:focus,
+    .coord-field input[type="text"]:focus {
+      outline: none;
+      border-color: var(--ui-accent);
+    }
+    .label-input-wrapper {
+      position: relative;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      min-width: 0;
+    }
+    .label-ghost-suffix {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      padding: 3px 6px;
+      font-family: monospace;
+      font-size: 11px;
+      white-space: pre;
+      overflow: hidden;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      z-index: 1;
+    }
+    .label-input-wrapper:focus-within .label-ghost-suffix {
+      opacity: 1;
+    }
+    .ghost-invisible-text {
+      visibility: hidden;
+    }
+    .ghost-warn-text {
+      color: var(--ui-warning, #f59e0b);
+      opacity: 0.85;
+      font-size: 10px;
+    }
+
+    /* フッターエリア（ステータス・コピーライト） */
+    footer {
+      background: var(--ui-panel-bg);
+      border-top: 1px solid var(--ui-panel-border);
+      padding: 6px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .btn-action {
+      background: var(--ui-accent);
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.15s, transform 0.05s;
+    }
+    .btn-action:hover {
+      background: var(--ui-accent-hover);
+    }
+    .btn-action:active {
+      transform: scale(0.97);
+    }
+    .btn-action.btn-secondary {
+      background: #2a2a38;
+      color: var(--ui-text);
+      border: 1px solid var(--ui-panel-border);
+    }
+    .btn-action.btn-secondary:hover {
+      background: #363648;
+    }
+    .copyright {
+      font-size: 11px;
+      color: var(--ui-text-dim);
+      font-family: monospace;
+    }
+
+    /* トースト通知 */
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #00d2ff;
+      color: #000;
+      font-weight: bold;
+      padding: 8px 18px;
+      border-radius: 6px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      transition: transform 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      z-index: 10000;
+      pointer-events: none;
+      font-size: 12px;
+    }
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ========================================================
+       ★ InputOverlay.html 互換レイアウト・スタイル定義
+       ======================================================== */
+    #overlay-root {
+      position: relative;
+      width: 640px;
+      height: 360px;
+      background-color: var(--bg-color, rgba(15, 15, 20, 0.95));
+      color: rgba(255, 255, 255, 1.0);
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* モード表示バッジ */
+    #mode-display {
+      display: var(--mode-display, flex);
+      position: absolute;
+      top: 15px;
+      left: 20px;
+      font-family: monospace, sans-serif;
+      font-size: 11px;
+      font-weight: bold;
+      color: rgba(0, 210, 255, 0.9);
+      background: rgba(0, 0, 0, 0.4);
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(0, 210, 255, 0.3);
+      letter-spacing: 0.5px;
+      z-index: 10;
+    }
+
+    /* 共通ボタン描画 */
+    .btn {
+      position: absolute;
+      width: var(--btn-size, 62px);
+      height: var(--btn-size, 62px);
+      border-radius: 50%;
+      border: 2px solid var(--btn-border-color, rgba(255, 255, 255, 0.45));
+      background-color: var(--btn-bg-color, rgba(30, 30, 40, 0.85));
+      color: var(--btn-text-color, rgba(255, 255, 255, 1.0));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: calc(var(--btn-size, 62px) * 0.35);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      transition: background-color 0.05s, transform 0.05s, border-color 0.05s;
+      cursor: default;
+    }
+    .btn::after {
+      content: attr(data-label);
+    }
+    .btn.active {
+      background-color: var(--btn-active-bg, rgba(0, 210, 255, 1.0));
+      border-color: var(--btn-active-border, rgba(255, 255, 255, 1.0));
+      color: var(--btn-active-text, rgba(0, 0, 0, 1.0));
+      transform: scale(0.92);
+      box-shadow: 0 0 12px var(--btn-active-glow, rgba(0, 210, 255, 0.8));
+    }
+
+    /* 文字数フォントサイズ自動調整（ボタン直径に比例連動） */
+    .btn.text-long  { font-size: calc(var(--btn-size, 62px) * 0.24); }
+    .btn.text-xlong { font-size: calc(var(--btn-size, 62px) * 0.19); }
+
+    /* 特殊ボタンサイズ */
+    .btn-sys { width: var(--btn-size, 48px); height: var(--btn-size, 48px); }
+    .btn-jump { width: var(--btn-size, var(--size-jump, 62px)); height: var(--btn-size, var(--size-jump, 62px)); }
+
+    /* モード依存の表示切替 */
+    .mode-lever { display: var(--lever-display, flex); align-items: center; justify-content: center; }
+    .mode-mvmt  { display: var(--mvmt-display, none); }
+    .mode-jump  { display: var(--jump-display, none); }
+    .mode-log   { display: var(--log-display, flex); align-items: center; }
+
+    /* 位置・サイズ指定マッピング */
+    #btn-08 { --btn-size: var(--size-btn-08, 48px); display: var(--disp-btn-08, flex); top: var(--pos-btn-08-top, 40px); left: var(--pos-btn-08-left, 60px); }
+    #btn-09 { --btn-size: var(--size-btn-09, 48px); display: var(--disp-btn-09, flex); top: var(--pos-btn-09-top, 40px); left: var(--pos-btn-09-left, 116px); }
+    #btn-14 { --btn-size: var(--size-btn-14, 62px); top: var(--pos-btn-14-top, 135px); left: var(--pos-btn-14-left, 69px); }
+    #btn-13 { --btn-size: var(--size-btn-13, 62px); top: var(--pos-btn-13-top, 105px); left: var(--pos-btn-13-left, 125px); }
+    #btn-15 { --btn-size: var(--size-btn-15, 62px); top: var(--pos-btn-15-top, 135px); left: var(--pos-btn-15-left, 181px); }
+    #btn-12 { --btn-size: var(--size-jump, 62px);   top: var(--pos-jump-top, 198px);   left: var(--pos-jump-left, 224px); }
+    #btn-10 { --btn-size: var(--size-btn-10, 62px); display: var(--disp-btn-10, flex); top: var(--pos-btn-10-top, 110px); left: var(--pos-btn-10-left, 257px); }
+    #btn-11 { --btn-size: var(--size-btn-11, 62px); display: var(--disp-btn-11, flex); top: var(--pos-btn-11-top, 210px); left: var(--pos-btn-11-left, 286px); }
+    #btn-02 { --btn-size: var(--size-btn-02, 62px); display: var(--disp-btn-02, flex); top: var(--pos-btn-02-top, 78px);  left: var(--pos-btn-02-left, 325px); }
+    #btn-03 { --btn-size: var(--size-btn-03, 62px); display: var(--disp-btn-03, flex); top: var(--pos-btn-03-top, 78px);  left: var(--pos-btn-03-left, 389px); }
+    #btn-05 { --btn-size: var(--size-btn-05, 62px); display: var(--disp-btn-05, flex); top: var(--pos-btn-05-top, 78px);  left: var(--pos-btn-05-left, 453px); }
+    #btn-04 { --btn-size: var(--size-btn-04, 62px); display: var(--disp-btn-04, flex); top: var(--pos-btn-04-top, 78px);  left: var(--pos-btn-04-left, 517px); }
+    #btn-00 { --btn-size: var(--size-btn-00, 62px); display: var(--disp-btn-00, flex); top: var(--pos-btn-00-top, 142px); left: var(--pos-btn-00-left, 313px); }
+    #btn-01 { --btn-size: var(--size-btn-01, 62px); display: var(--disp-btn-01, flex); top: var(--pos-btn-01-top, 142px); left: var(--pos-btn-01-left, 377px); }
+    #btn-07 { --btn-size: var(--size-btn-07, 62px); display: var(--disp-btn-07, flex); top: var(--pos-btn-07-top, 142px); left: var(--pos-btn-07-left, 441px); }
+    #btn-06 { --btn-size: var(--size-btn-06, 62px); display: var(--disp-btn-06, flex); top: var(--pos-btn-06-top, 142px); left: var(--pos-btn-06-left, 505px); }
+
+    /* レバー描画 */
+    #lever-base {
+      position: absolute;
+      top: var(--pos-lever-top, 87px);
+      left: var(--pos-lever-left, 120px);
+      width: var(--size-lever, 116px);
+      height: var(--size-lever, 116px);
+      border-radius: 50%;
+      background: var(--lever-base-bg, rgba(255, 255, 255, 0.05));
+      border: 2px dashed var(--lever-base-border, rgba(255, 255, 255, 0.2));
+      cursor: default;
+    }
+    #lever-ball {
+      width: var(--size-lever-ball, 52px);
+      height: var(--size-lever-ball, 52px);
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, var(--lever-ball-color-1, rgba(255, 82, 82, 1.0)), var(--lever-ball-color-2, rgba(167, 0, 0, 1.0)));
+      border: 2px solid var(--lever-ball-border, rgba(255, 255, 255, 1.0));
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      transition: transform 0.04s ease-out;
+      pointer-events: none;
+    }
+
+    /* 入力履歴ログ描画 */
+    #input-log {
+      position: absolute;
+      bottom: 12px;
+      left: 15px;
+      width: 610px;
+      height: 38px;
+      background: var(--log-bg-color, rgba(0, 0, 0, 0.6));
+      border: 1px solid var(--log-border-color, rgba(255, 255, 255, 0.15));
+      border-radius: 6px;
+      flex-direction: row;
+      padding: 0 14px;
+      overflow: hidden;
+      font-family: monospace, "Yu Gothic UI", "Meiryo", sans-serif;
+      font-size: 14px;
+      gap: 12px;
+      pointer-events: none;
+    }
+    .log-item {
+      white-space: nowrap;
+      opacity: 0.5;
+      color: var(--log-text-color, rgba(255, 255, 255, 0.5));
+      flex-shrink: 0;
+    }
+    .log-item:first-child {
+      opacity: 1;
+      color: var(--log-latest-color, rgba(0, 210, 255, 1.0));
+      font-weight: bold;
+    }
+
+    /* ========================================================
+       エディター用 インタラクティブ・ハイライト機能
+       ======================================================== */
+    body.mouse-select-enabled .btn,
+    body.mouse-select-enabled #lever-base {
+      cursor: pointer;
+    }
+    body.mouse-drag-enabled .btn,
+    body.mouse-drag-enabled #lever-base {
+      cursor: grab;
+    }
+    body.mouse-drag-enabled .btn:active,
+    body.mouse-drag-enabled #lever-base:active {
+      cursor: grabbing;
+    }
+
+    /* 選択中ボタンの強調表示枠 */
+    .editor-selected {
+      outline: 3px solid #ffcc00 !important;
+      outline-offset: 3px !important;
+      box-shadow: 0 0 16px rgba(255, 204, 0, 0.9) !important;
+      z-index: 99 !important;
+    }
+  </style>
+
+  <!-- 動的に更新されるCSS変数値エリア -->
+  <style id="dynamic-overlay-css"></style>
+</head>
+<body class="mouse-select-enabled">
+
+  <!-- ヘッダー -->
+  <header>
+    <div class="title-group">
+      <div class="title-main-row">
+        <h1 data-i18n="appTitle">天板レイアウトさん</h1>
+        <span class="version-badge">v1.0.0</span>
+      </div>
+      <div class="subtitle">
+        for <a href="https://github.com/nanmo/obs-lever-leverless-input-overlay" target="_blank" rel="noopener noreferrer">obs-lever-leverless-input-overlay</a>
+      </div>
+      <div class="title-notice" data-i18n="titleNotice">
+        ※obs-lever-leverless-input-overlayのすべての設定を編集できるわけではありません
+      </div>
+    </div>
+
+    <!-- ツール設定 -->
+    <div class="tool-settings">
+      <span class="tool-settings-header" data-i18n="toolSettings">ツール設定</span>
+      <div class="tool-settings-row">
+        <label>
+          <span data-i18n="scale">表示倍率:</span>
+          <select id="zoom-select">
+            <option value="0.25">25%</option>
+            <option value="0.5">50%</option>
+            <option value="1" selected>100%</option>
+            <option value="1.5">150%</option>
+            <option value="2">200%</option>
+            <option value="2.5">250%</option>
+            <option value="3">300%</option>
+            <option value="4">400%</option>
+            <option value="5">500%</option>
+          </select>
+        </label>
+        <span id="zoom-warning" class="zoom-warning" style="display: none;" data-i18n="scaleWarn">
+          ※100%以外だと実際と見た目が異なります
+        </span>
+        <label style="margin-left: auto;">
+          <span data-i18n="lang">言語 / Language:</span>
+          <select id="lang-select">
+            <option value="ja">日本語</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+      </div>
+      <div class="tool-settings-row">
+        <label>
+          <input type="checkbox" id="chk-mouse-select" checked>
+          <span data-i18n="mouseSelect">マウスでも選択する</span>
+        </label>
+        <label id="lbl-mouse-drag" style="margin-left: 6px; opacity: 1;">
+          <input type="checkbox" id="chk-mouse-drag">
+          <span data-i18n="mouseDrag">マウスでも移動できるように</span>
+        </label>
+        <label style="margin-left: 6px;">
+          <input type="checkbox" id="chk-show-hidden-buttons">
+          <span data-i18n="showHidden">編集用に非表示にした要素を薄く表示する</span>
+        </label>
+      </div>
+      <div class="tool-settings-row">
+        <label>
+          <input type="checkbox" id="chk-show-all-buttons">
+          <span data-i18n="showAllBtns">常にすべての表示設定を表示</span>
+        </label>
+        <label style="margin-left: 12px;">
+          <input type="checkbox" id="chk-show-file-ops">
+          <span data-i18n="showFileOps">ファイル操作系ボタンを表示</span>
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <!-- メインレイアウト -->
+  <main>
+    <!-- 左ペイン：カスタムCSSプレビュー & 操作ボタン -->
+    <section class="pane">
+      <div class="pane-header">
+        <span data-i18n="cssPreviewTitle">カスタムCSSプレビュー</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button type="button" id="btn-expand-css" class="btn-action btn-secondary" style="padding: 2px 8px; font-size: 11px;" data-i18n="btnExpandCss">
+            ⛶ 拡大表示
+          </button>
+          <span class="subtext" data-i18n="realtimeGen">リアルタイム生成</span>
+        </div>
+      </div>
+      <div class="pane-body">
+        <div style="font-size: 11px; color: var(--ui-text-dim); margin-bottom: 2px;" data-i18n="cssNote">
+          カスタムCSSの状況が常に見えるテキストエリア (編集不可)
+        </div>
+        <textarea id="css-preview-textarea" readonly spellcheck="false"></textarea>
+
+        <!-- アクションボタン群（テキストエリア直下・同一枠内） -->
+        <div class="css-pane-actions">
+          <button type="button" class="btn-action" id="btn-copy-css" style="width: 100%; justify-content: center;" data-i18n="btnCopyCss">
+            📋 カスタムCSS全文をクリップボードにコピー
+          </button>
+
+          <!-- ファイル操作系ボタン（デフォルト非表示、ツール設定で連動） -->
+          <div class="file-actions-group" id="file-actions-group" style="display: none;">
+            <div class="file-action-item">
+              <button type="button" class="btn-action btn-secondary" id="btn-save-css" style="width: 100%; justify-content: center;" data-i18n="btnSaveCss">
+                💾 CSSファイルとして保存
+              </button>
+              <div style="font-size: 11px; color: var(--ui-warning); font-weight: bold;" data-i18n="saveDialogWarn">
+                ⚠️ ※ファイル保存ダイアログが開きます
+              </div>
+            </div>
+
+            <div class="file-action-item">
+              <button type="button" class="btn-action btn-secondary" id="btn-load-css" style="width: 100%; justify-content: center;" data-i18n="btnLoadCss">
+                📂 CSSファイルを読み込み
+              </button>
+              <input type="file" id="file-input-css" accept=".css" style="display: none;">
+              <div style="font-size: 11px; color: var(--ui-warning); line-height: 1.35;">
+                <div data-i18n="loadDialogWarn" style="font-weight: bold;">📂 ※ファイル読込ダイアログが開きます</div>
+                <div style="color: var(--ui-danger); font-weight: bold;" data-i18n="loadDangerWarn">※合わないCSSを読み込ませると正常に動作しなくなります</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 中央ペイン：レイアウトプレビュー兼エディター -->
+    <section class="pane">
+      <div class="pane-header">
+        <span data-i18n="editorTitle">レイアウトプレビュー兼エディター</span>
+        <span class="subtext">obs-lever-leverless-input-overlay simulate</span>
+      </div>
+      <div class="pane-body editor-pane-body">
+        <div class="preview-canvas-outer" id="preview-outer">
+          <div class="preview-canvas-wrapper" id="preview-wrapper">
+            <!-- InputOverlay.html と同一構成のDOMツリー -->
+            <div id="overlay-root">
+              <div id="mode-display">MODE: ---</div>
+
+              <div id="lever-base" class="mode-lever">
+                <div id="lever-ball"></div>
+              </div>
+
+              <!-- システムボタン -->
+              <div id="btn-08" class="btn btn-sys" data-id="btn-08"></div>
+              <div id="btn-09" class="btn btn-sys" data-id="btn-09"></div>
+
+              <!-- 移動ボタン -->
+              <div id="btn-14" class="btn mode-mvmt" data-id="btn-14"></div>
+              <div id="btn-13" class="btn mode-mvmt" data-id="btn-13"></div>
+              <div id="btn-15" class="btn mode-mvmt" data-id="btn-15"></div>
+
+              <!-- ジャンプボタン -->
+              <div id="btn-12" class="btn btn-jump mode-jump" data-id="btn-12"></div>
+
+              <!-- サブボタン -->
+              <div id="btn-10" class="btn" data-id="btn-10"></div>
+              <div id="btn-11" class="btn" data-id="btn-11"></div>
+
+              <!-- 攻撃ボタン -->
+              <div id="btn-02" class="btn" data-id="btn-02"></div>
+              <div id="btn-03" class="btn" data-id="btn-03"></div>
+              <div id="btn-05" class="btn" data-id="btn-05"></div>
+              <div id="btn-04" class="btn" data-id="btn-04"></div>
+              <div id="btn-00" class="btn" data-id="btn-00"></div>
+              <div id="btn-01" class="btn" data-id="btn-01"></div>
+              <div id="btn-07" class="btn" data-id="btn-07"></div>
+              <div id="btn-06" class="btn" data-id="btn-06"></div>
+
+              <!-- 入力履歴ログ -->
+              <div id="input-log" class="mode-log"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 右ペイン：レバー・ボタン設定パネル -->
+    <section class="pane">
+      <div class="pane-header">
+        <span data-i18n="settingsTitle">レバー・ボタン設定パネル</span>
+        <span class="subtext" data-i18n="realtimeSync">リアルタイム同期</span>
+      </div>
+      <div class="pane-body">
+        <!-- モード・ログ表示設定 -->
+        <div class="section-card">
+          <div class="section-title" data-i18n="modeLogTitle">モード・ログ表示設定</div>
+          <div style="display: flex; flex-direction: column; gap: 6px; font-size: 12px;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" id="chk-disp-mode" checked>
+              <span data-i18n="dispModeBadge">モード表示バッジを表示</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" id="chk-disp-log" checked>
+              <span data-i18n="dispInputLog">入力履歴ログを表示</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 移動操作タイプ -->
+        <div class="section-card">
+          <div class="section-title" data-i18n="mvmtTypeTitle">移動操作タイプ</div>
+          <div class="radio-group">
+            <label>
+              <input type="radio" name="ctrl-mode" value="lever" checked>
+              <span data-i18n="modeLever">レバー（アケコン標準）</span>
+            </label>
+            <label>
+              <input type="radio" name="ctrl-mode" value="lever-jump">
+              <span data-i18n="modeLeverJump">レバー＋ジャンプボタン</span>
+            </label>
+            <label>
+              <input type="radio" name="ctrl-mode" value="leverless">
+              <span data-i18n="modeLeverless">レバーレス（オールボタン）</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- レバー・ボタン表示設定 -->
+        <div class="section-card">
+          <div class="section-title" data-i18n="btnSettingsTitle">レバー・ボタン表示設定</div>
+          <div>
+            <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; user-select: none;">
+              <input type="checkbox" id="chk-multi-select">
+              <span data-i18n="multiSelectMode">複数選択モード</span>
+              <span style="font-size: 11px; color: var(--ui-text-dim);" data-i18n="multiSelectNote">（切り替え時に選択全解除）</span>
+            </label>
+          </div>
+
+          <!-- 複数選択時の一括1px移動キーパッド -->
+          <div id="multi-move-keypad" style="display: none; flex-direction: column; align-items: center; gap: 5px; padding: 8px 6px; background: rgba(0,0,0,0.3); border: 1px solid var(--ui-panel-border); border-radius: 6px;">
+            <span style="font-size: 11px; color: var(--ui-text-dim); font-weight: bold;" data-i18n="nudgeTitle">選択要素を一括移動 (1px)</span>
+            <div style="display: grid; grid-template-columns: repeat(3, 34px); grid-template-rows: repeat(2, 26px); gap: 4px; justify-content: center;">
+              <button type="button" class="btn-action btn-secondary btn-nudge" data-dy="-1" data-dx="0" style="grid-column: 2; padding: 0; justify-content: center; font-size: 12px;" title="上へ1px">▲</button>
+              <button type="button" class="btn-action btn-secondary btn-nudge" data-dy="0" data-dx="-1" style="grid-column: 1; grid-row: 2; padding: 0; justify-content: center; font-size: 12px;" title="左へ1px">◀</button>
+              <button type="button" class="btn-action btn-secondary btn-nudge" data-dy="1" data-dx="0" style="grid-column: 2; grid-row: 2; padding: 0; justify-content: center; font-size: 12px;" title="下へ1px">▼</button>
+              <button type="button" class="btn-action btn-secondary btn-nudge" data-dy="0" data-dx="1" style="grid-column: 3; grid-row: 2; padding: 0; justify-content: center; font-size: 12px;" title="右へ1px">▶</button>
+            </div>
+          </div>
+
+          <button type="button" id="btn-deselect" class="btn-action btn-secondary" style="width: 100%; justify-content: center; padding: 5px 10px; font-size: 11px; opacity: 0.5; cursor: default;" disabled data-i18n="btnDeselect">
+            レバー・ボタン選択状態を解除
+          </button>
+          <div id="btn-settings-desc" style="font-size: 11px; color: var(--ui-text-dim); line-height: 1.4;" data-i18n="btnSettingsDesc">
+            接続されたコントローラーで最後に入力のあった、またはマウス選択設定オンで最後にクリックされたボタン設定を表示・選択します。
+          </div>
+          <div id="button-settings-container" style="display: flex; flex-direction: column; gap: 8px;">
+            <!-- JSで動的生成 -->
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- フッター -->
+  <footer>
+    <div style="font-size: 11px; color: var(--ui-text-dim);" data-i18n="footerNote">
+      ※生成されたCSSはOBSのブラウザソースプロパティ「カスタムCSS」に貼り付けて使用できます
+    </div>
+    <div class="copyright">
+      (C) 2026 Nanmo w/Gemini&Antigravity
+    </div>
+  </footer>
+
+  <!-- CSSプレビュー拡大表示モーダル -->
+  <div id="modal-css-expand" class="modal-backdrop" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-title" data-i18n="cssPreviewTitle">カスタムCSSプレビュー</span>
+        <button type="button" id="btn-close-modal" class="btn-action btn-secondary" style="padding: 4px 10px;" data-i18n="btnCloseExpandCss">
+          ✖ 閉じる
+        </button>
+      </div>
+      <div class="modal-body">
+        <textarea id="modal-css-textarea" readonly spellcheck="false"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-action" id="btn-modal-copy-css" data-i18n="btnCopyCss">
+          📋 カスタムCSS全文をクリップボードにコピー
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- トースト通知 -->
+  <div id="toast">クリップボードにコピーしました！</div>
+
+  <script>
+    /* ========================================================
+       状態管理（カスタムCSSの全変数 + ラベル設定に対応）
+       ======================================================== */
+    const configState = {
+      // モード切替
+      leverDisplay: "flex",
+      mvmtDisplay:  "none",
+      jumpDisplay:  "none",
+      modeDisplay:  "flex",
+      logDisplay:   "flex",
+
+      // ボタン表示ラベル
+      labelBtn14: "←",
+      labelBtn13: "↓",
+      labelBtn15: "→",
+      labelJump:  "↑",
+
+      labelBtn02: "LP",
+      labelBtn03: "MP",
+      labelBtn05: "HP",
+      labelBtn04: "L1",
+
+      labelBtn00: "LK",
+      labelBtn01: "MK",
+      labelBtn07: "HK",
+      labelBtn06: "L2",
+
+      labelBtn10: "L3",
+      labelBtn11: "R3",
+
+      labelBtn08: "VIEW",
+      labelBtn09: "MENU",
+
+      // ボタンサイズ（個別指定）
+      sizeBtn14: 62, sizeBtn13: 62, sizeBtn15: 62, sizeJump: 62,
+      sizeBtn02: 62, sizeBtn03: 62, sizeBtn05: 62, sizeBtn04: 62,
+      sizeBtn00: 62, sizeBtn01: 62, sizeBtn07: 62, sizeBtn06: 62,
+      sizeBtn10: 62, sizeBtn11: 62,
+      sizeBtn08: 48, sizeBtn09: 48,
+
+      // レバーサイズ・位置
+      sizeLever: 116,   sizeLeverBall: 52,
+      posLeverTop: 87,  posLeverLeft: 120,
+
+      // 移動ボタン位置 (Btn 14: ←, Btn 13: ↓, Btn 15: →, Btn 12: ↑)
+      posBtn14Top: 135, posBtn14Left: 69,
+      posBtn13Top: 105, posBtn13Left: 125,
+      posBtn15Top: 135, posBtn15Left: 181,
+      posJumpTop:  198, posJumpLeft:  224,
+
+      // 攻撃ボタン（上段）
+      dispBtn02: "flex", posBtn02Top: 78, posBtn02Left: 325,
+      dispBtn03: "flex", posBtn03Top: 78, posBtn03Left: 389,
+      dispBtn05: "flex", posBtn05Top: 78, posBtn05Left: 453,
+      dispBtn04: "flex", posBtn04Top: 78, posBtn04Left: 517,
+
+      // 攻撃ボタン（下段）
+      dispBtn00: "flex", posBtn00Top: 142, posBtn00Left: 313,
+      dispBtn01: "flex", posBtn01Top: 142, posBtn01Left: 377,
+      dispBtn07: "flex", posBtn07Top: 142, posBtn07Left: 441,
+      dispBtn06: "flex", posBtn06Top: 142, posBtn06Left: 505,
+
+      // サブボタン
+      dispBtn10: "flex", posBtn10Top: 110, posBtn10Left: 257,
+      dispBtn11: "flex", posBtn11Top: 210, posBtn11Left: 286,
+
+      // システムボタン
+      dispBtn08: "flex", posBtn08Top: 40, posBtn08Left: 60,
+      dispBtn09: "flex", posBtn09Top: 40, posBtn09Left: 116
+    };
+
+    const DEFAULT_CONFIG_STATE = Object.assign({}, configState);
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function escapeCssString(str) {
+      return String(str)
+        .replace(/\\/g, "\\\\")
+        .replace(/"/g, '\\"')
+        .replace(/<\//g, "<\\/")
+        .replace(/\r?\n/g, " ");
+    }
+
+    // 要素定義一覧（カッコ付き表示を廃止し、スッキリ統一）
+    const ELEMENTS_DEF = [
+      { id: "lever-base", keyName: "Lever", name: "レバー本体", isLever: true, hasSize: true, sizeKey: "sizeLever" },
+      { id: "btn-14",     keyName: "Btn14", name: "Btn 14", isMvmt: true, hasLabel: true, labelKey: "labelBtn14", hasSize: true, sizeKey: "sizeBtn14" },
+      { id: "btn-13",     keyName: "Btn13", name: "Btn 13", isMvmt: true, hasLabel: true, labelKey: "labelBtn13", hasSize: true, sizeKey: "sizeBtn13" },
+      { id: "btn-15",     keyName: "Btn15", name: "Btn 15", isMvmt: true, hasLabel: true, labelKey: "labelBtn15", hasSize: true, sizeKey: "sizeBtn15" },
+      { id: "btn-12",     keyName: "Jump",  name: "Btn 12", isJump: true, hasLabel: true, labelKey: "labelJump", hasSize: true, sizeKey: "sizeJump" },
+
+      { id: "btn-02",     keyName: "Btn02", name: "Btn 02", hasDisp: true, hasLabel: true, labelKey: "labelBtn02", hasSize: true, sizeKey: "sizeBtn02" },
+      { id: "btn-03",     keyName: "Btn03", name: "Btn 03", hasDisp: true, hasLabel: true, labelKey: "labelBtn03", hasSize: true, sizeKey: "sizeBtn03" },
+      { id: "btn-05",     keyName: "Btn05", name: "Btn 05", hasDisp: true, hasLabel: true, labelKey: "labelBtn05", hasSize: true, sizeKey: "sizeBtn05" },
+      { id: "btn-04",     keyName: "Btn04", name: "Btn 04", hasDisp: true, hasLabel: true, labelKey: "labelBtn04", hasSize: true, sizeKey: "sizeBtn04" },
+
+      { id: "btn-00",     keyName: "Btn00", name: "Btn 00", hasDisp: true, hasLabel: true, labelKey: "labelBtn00", hasSize: true, sizeKey: "sizeBtn00" },
+      { id: "btn-01",     keyName: "Btn01", name: "Btn 01", hasDisp: true, hasLabel: true, labelKey: "labelBtn01", hasSize: true, sizeKey: "sizeBtn01" },
+      { id: "btn-07",     keyName: "Btn07", name: "Btn 07", hasDisp: true, hasLabel: true, labelKey: "labelBtn07", hasSize: true, sizeKey: "sizeBtn07" },
+      { id: "btn-06",     keyName: "Btn06", name: "Btn 06", hasDisp: true, hasLabel: true, labelKey: "labelBtn06", hasSize: true, sizeKey: "sizeBtn06" },
+
+      { id: "btn-10",     keyName: "Btn10", name: "Btn 10", hasDisp: true, hasLabel: true, labelKey: "labelBtn10", hasSize: true, sizeKey: "sizeBtn10" },
+      { id: "btn-11",     keyName: "Btn11", name: "Btn 11", hasDisp: true, hasLabel: true, labelKey: "labelBtn11", hasSize: true, sizeKey: "sizeBtn11" },
+
+      { id: "btn-08",     keyName: "Btn08", name: "Btn 08", hasDisp: true, isSys: true, hasLabel: true, labelKey: "labelBtn08", hasSize: true, sizeKey: "sizeBtn08" },
+      { id: "btn-09",     keyName: "Btn09", name: "Btn 09", hasDisp: true, isSys: true, hasLabel: true, labelKey: "labelBtn09", hasSize: true, sizeKey: "sizeBtn09" }
+    ];
+
+    /* ========================================================
+       CSSテキスト生成 & プレビュー同期
+       ======================================================== */
+    /* ========================================================
+       国際化 (i18n: 日本語 / English 簡易切替)
+       ======================================================== */
+    const initialLang = (navigator.language || "").toLowerCase().startsWith("ja") ? "ja" : "en";
+    let currentLang = initialLang;
+    const I18N = {
+      ja: {
+        appTitle: "天板レイアウトさん",
+        toolSettings: "ツール設定",
+        scale: "表示倍率:",
+        scaleWarn: "※100%以外だと実際と見た目が異なります",
+        lang: "言語 / Language:",
+        mouseSelect: "マウスでも選択する",
+        mouseDrag: "マウスでも移動できるように",
+        showHidden: "編集用に非表示にした要素を薄く表示する",
+        showAllBtns: "常にすべての表示設定を表示",
+        showFileOps: "ファイル操作系ボタンを表示",
+
+        cssPreviewTitle: "カスタムCSSプレビュー",
+        btnExpandCss: "⛶ 拡大表示",
+        realtimeGen: "リアルタイム生成",
+        cssNote: "カスタムCSSの状況が常に見えるテキストエリア (編集不可)",
+        btnCopyCss: "📋 カスタムCSS全文をクリップボードにコピー",
+        btnSaveCss: "💾 CSSファイルとして保存",
+        saveDialogWarn: "⚠️ ※ファイル保存ダイアログが開きます",
+        btnLoadCss: "📂 CSSファイルを読み込み",
+        loadDialogWarn: "📂 ※ファイル読込ダイアログが開きます",
+        loadDangerWarn: "※合わないCSSを読み込ませると正常に動作しなくなります",
+        titleNotice: "※obs-lever-leverless-input-overlayのすべての設定を編集できるわけではありません",
+
+        editorTitle: "レイアウトプレビュー兼エディター",
+
+        settingsTitle: "レバー・ボタン設定パネル",
+        realtimeSync: "リアルタイム同期",
+        modeLogTitle: "モード・ログ表示設定",
+        dispModeBadge: "モード表示バッジを表示",
+        dispInputLog: "入力履歴ログを表示",
+        mvmtTypeTitle: "移動操作タイプ",
+        modeLever: "レバー（アケコン標準）",
+        modeLeverJump: "レバー＋ジャンプボタン",
+        modeLeverless: "レバーレス（オールボタン）",
+
+        btnSettingsTitle: "レバー・ボタン表示設定",
+        multiSelectMode: "複数選択モード",
+        multiSelectNote: "（切り替え時に選択全解除）",
+        nudgeTitle: "選択要素を一括移動 (1px)",
+        nudgeUp: "上へ1px",
+        nudgeDown: "下へ1px",
+        nudgeLeft: "左へ1px",
+        nudgeRight: "右へ1px",
+        btnDeselect: "レバー・ボタン選択状態を解除",
+        deselectItem: "選択解除",
+        btnSettingsDesc: "接続されたコントローラーで最後に入力のあった、またはマウス選択設定オンで最後にクリックされたボタン設定を表示・選択します。",
+
+        guideMouseOn: "🎮 コントローラーのボタンを押すか、<br>マウスでボタンを選択してください",
+        guideMouseOff: "🎮 コントローラーのボタンを押して選択してください<br><span style=\"font-size: 10px; color: var(--ui-text-dim); display: block; margin-top: 6px;\">（※上部ツール設定の「マウスでも選択する」をオンにするとクリック選択も可能になります）</span>",
+
+        btnDispLabel: "表示する",
+        btnTextLabel: "テキスト",
+        ghostTextSuggestion: "⚠️予測変換注意",
+        btnSizeLabel: "直径",
+        leverBaseName: "レバー本体",
+
+        footerNote: "※生成されたCSSはOBSのブラウザソースプロパティ「カスタムCSS」に貼り付けて使用できます",
+        toastCopied: "カスタムCSS全文をクリップボードにコピーしました！",
+        toastSaved: "CSSファイルを保存しました！",
+        toastLoaded: "CSSを読み込みました ({count}項目)",
+        alertLoadInvalid: "有効な設定項目が見つかりませんでした。obs-lever-leverless-input-overlay用のCSSファイルか確認してください。",
+        cssFileDesc: "CSSファイル",
+        btnCloseExpandCss: "✖ 閉じる"
+      },
+      en: {
+        appTitle: "TENBAN-Layout-San",
+        toolSettings: "Tool Settings",
+        scale: "Scale:",
+        scaleWarn: "*Appearance differs from actual at non-100% scale",
+        lang: "言語 / Language:",
+        mouseSelect: "Select with mouse",
+        mouseDrag: "Move buttons with mouse",
+        showHidden: "Dimly show hidden elements for editing",
+        showAllBtns: "Always show all display settings",
+        showFileOps: "Show file operation buttons",
+
+        cssPreviewTitle: "Custom CSS Preview",
+        btnExpandCss: "⛶ Expand View",
+        realtimeGen: "Real-time Output",
+        cssNote: "Live Custom CSS output (Read only)",
+        btnCopyCss: "📋 Copy Full Custom CSS to Clipboard",
+        btnSaveCss: "💾 Save as CSS File",
+        saveDialogWarn: "⚠️ *File save dialog will open",
+        btnLoadCss: "📂 Load CSS File",
+        loadDialogWarn: "📂 *File open dialog will open",
+        loadDangerWarn: "*Loading invalid CSS may cause unexpected behavior",
+        titleNotice: "*Not all settings of obs-lever-leverless-input-overlay can be edited",
+
+        editorTitle: "Layout Preview & Editor",
+
+        settingsTitle: "Lever & Button Settings Panel",
+        realtimeSync: "Real-time Sync",
+        modeLogTitle: "Mode & Log Display Settings",
+        dispModeBadge: "Show mode display badge",
+        dispInputLog: "Show input history log",
+        mvmtTypeTitle: "Movement Type",
+        modeLever: "Lever (Standard Stick)",
+        modeLeverJump: "Lever + Jump Button",
+        modeLeverless: "Leverless (All-Button)",
+
+        btnSettingsTitle: "Lever & Button Settings",
+        multiSelectMode: "Multi-selection Mode",
+        multiSelectNote: "(Deselects all on toggle)",
+        nudgeTitle: "Nudge Selected (1px)",
+        nudgeUp: "Up 1px",
+        nudgeDown: "Down 1px",
+        nudgeLeft: "Left 1px",
+        nudgeRight: "Right 1px",
+        btnDeselect: "Deselect Lever / Button",
+        deselectItem: "Deselect",
+        btnSettingsDesc: "Shows and selects settings for the button last pressed on a connected controller or clicked with mouse selection enabled.",
+
+        guideMouseOn: "🎮 Press a button on controller,<br>or click a button with mouse",
+        guideMouseOff: "🎮 Press a button on controller to select<br><span style=\"font-size: 10px; color: var(--ui-text-dim); display: block; margin-top: 6px;\">(*Turn on \"Select with mouse\" in tool settings to enable click selection)</span>",
+
+        btnDispLabel: "Display",
+        btnTextLabel: "Text",
+        ghostTextSuggestion: "⚠️Text suggestions",
+        btnSizeLabel: "Size",
+        leverBaseName: "Lever Base",
+
+        footerNote: "*Paste generated CSS into the \"Custom CSS\" field in OBS Browser Source properties",
+        toastCopied: "Full custom CSS copied to clipboard!",
+        toastSaved: "CSS file saved successfully!",
+        toastLoaded: "CSS loaded successfully ({count} items)",
+        alertLoadInvalid: "No valid settings found. Please check if this is a valid CSS file for obs-lever-leverless-input-overlay.",
+        cssFileDesc: "CSS File",
+        btnCloseExpandCss: "✖ Close"
+      }
+    };
+
+    function t(key) {
+      return (I18N[currentLang] && I18N[currentLang][key]) || (I18N["ja"][key]) || "";
+    }
+
+    function updateNudgeTitles() {
+      document.querySelectorAll(".btn-nudge").forEach(b => {
+        const dy = parseInt(b.dataset.dy, 10);
+        const dx = parseInt(b.dataset.dx, 10);
+        if (dy === -1) b.title = t("nudgeUp");
+        else if (dy === 1) b.title = t("nudgeDown");
+        else if (dx === -1) b.title = t("nudgeLeft");
+        else if (dx === 1) b.title = t("nudgeRight");
+      });
+    }
+
+    function applyLanguage(lang) {
+      currentLang = lang;
+      const selectEl = document.getElementById("lang-select");
+      if (selectEl && selectEl.value !== lang) {
+        selectEl.value = lang;
+      }
+      document.title = `${t("appTitle")} - for obs-lever-leverless-input-overlay`;
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        if (key && I18N[lang] && I18N[lang][key]) {
+          if (I18N[lang][key].includes("<")) {
+            el.innerHTML = I18N[lang][key];
+          } else {
+            el.textContent = I18N[lang][key];
+          }
+        }
+      });
+      updateNudgeTitles();
+      renderPropertyEditor();
+    }
+
+    const dynamicStyleEl = document.getElementById("dynamic-overlay-css");
+    const cssTextareaEl  = document.getElementById("css-preview-textarea");
+    const modeDisplayEl  = document.getElementById("mode-display");
+    const modalCssTextarea = document.getElementById("modal-css-textarea");
+
+    function generateCSSText() {
+      return `:root {
+  /* モード・表示切替 */
+  --lever-display: ${configState.leverDisplay}; /* レバー本体の表示 (flex / none) */
+  --mvmt-display:  ${configState.mvmtDisplay}; /* 移動ボタン(←↓→)表示 */
+  --jump-display:  ${configState.jumpDisplay}; /* 親指用ジャンプ(↑)ボタン表示 */
+  --mode-display:  ${configState.modeDisplay}; /* 左上モード表示バッジの表示 */
+  --log-display:   ${configState.logDisplay}; /* 下部入力履歴ログエリアの表示 */
+
+  /* ボタン表示名設定 */
+  --label-btn-14: "${escapeCssString(configState.labelBtn14)}"; /* Btn 14 (移動←) */
+  --label-btn-13: "${escapeCssString(configState.labelBtn13)}"; /* Btn 13 (↓) */
+  --label-btn-15: "${escapeCssString(configState.labelBtn15)}"; /* Btn 15 (移動→) */
+  --label-jump:   "${escapeCssString(configState.labelJump)}";  /* Btn 12 (移動↑ / ジャンプ) */
+
+  --label-btn-02: "${escapeCssString(configState.labelBtn02)}"; /* Btn 02 (LP) */
+  --label-btn-03: "${escapeCssString(configState.labelBtn03)}"; /* Btn 03 (MP) */
+  --label-btn-05: "${escapeCssString(configState.labelBtn05)}"; /* Btn 05 (HP) */
+  --label-btn-04: "${escapeCssString(configState.labelBtn04)}"; /* Btn 04 (L1) */
+
+  --label-btn-00: "${escapeCssString(configState.labelBtn00)}"; /* Btn 00 (LK) */
+  --label-btn-01: "${escapeCssString(configState.labelBtn01)}"; /* Btn 01 (MK) */
+  --label-btn-07: "${escapeCssString(configState.labelBtn07)}"; /* Btn 07 (HK) */
+  --label-btn-06: "${escapeCssString(configState.labelBtn06)}"; /* Btn 06 (L2) */
+
+  --label-btn-10: "${escapeCssString(configState.labelBtn10)}"; /* Btn 10 (L3) */
+  --label-btn-11: "${escapeCssString(configState.labelBtn11)}"; /* Btn 11 (R3) */
+
+  --label-btn-08: "${escapeCssString(configState.labelBtn08)}"; /* Btn 08 (VIEW) */
+  --label-btn-09: "${escapeCssString(configState.labelBtn09)}"; /* Btn 09 (MENU) */
+
+  /* ボタンサイズ設定 (個別数値指定) */
+  --size-btn-14: ${configState.sizeBtn14}px; /* Btn 14 (移動←) */
+  --size-btn-13: ${configState.sizeBtn13}px; /* Btn 13 (↓) */
+  --size-btn-15: ${configState.sizeBtn15}px; /* Btn 15 (移動→) */
+  --size-jump:   ${configState.sizeJump}px;  /* Btn 12 (移動↑ / ジャンプ) */
+
+  --size-btn-02: ${configState.sizeBtn02}px; /* Btn 02 (LP) */
+  --size-btn-03: ${configState.sizeBtn03}px; /* Btn 03 (MP) */
+  --size-btn-05: ${configState.sizeBtn05}px; /* Btn 05 (HP) */
+  --size-btn-04: ${configState.sizeBtn04}px; /* Btn 04 (L1) */
+
+  --size-btn-00: ${configState.sizeBtn00}px; /* Btn 00 (LK) */
+  --size-btn-01: ${configState.sizeBtn01}px; /* Btn 01 (MK) */
+  --size-btn-07: ${configState.sizeBtn07}px; /* Btn 07 (HK) */
+  --size-btn-06: ${configState.sizeBtn06}px; /* Btn 06 (L2) */
+
+  --size-btn-10: ${configState.sizeBtn10}px; /* Btn 10 (L3) */
+  --size-btn-11: ${configState.sizeBtn11}px; /* Btn 11 (R3) */
+
+  --size-btn-08: ${configState.sizeBtn08}px; /* Btn 08 (VIEW) */
+  --size-btn-09: ${configState.sizeBtn09}px; /* Btn 09 (MENU) */
+
+  /* レバーサイズ・位置 */
+  --size-lever:      ${configState.sizeLever}px; /* レバー土台（ガイド円）サイズ */
+  --size-lever-ball: ${configState.sizeLeverBall}px;  /* レバー玉サイズ */
+  --pos-lever-top:   ${configState.posLeverTop}px;  --pos-lever-left: ${configState.posLeverLeft}px; /* レバー本体 */
+
+  /* 移動ボタン位置 */
+  --pos-btn-14-top: ${configState.posBtn14Top}px; --pos-btn-14-left: ${configState.posBtn14Left}px;  /* Btn 14 (移動←) */
+  --pos-btn-13-top: ${configState.posBtn13Top}px; --pos-btn-13-left: ${configState.posBtn13Left}px; /* Btn 13 (↓) */
+  --pos-btn-15-top: ${configState.posBtn15Top}px; --pos-btn-15-left: ${configState.posBtn15Left}px; /* Btn 15 (移動→) */
+  --pos-jump-top:   ${configState.posJumpTop}px; --pos-jump-left:   ${configState.posJumpLeft}px; /* Btn 12 (移動↑ / ジャンプ) */
+
+  /* 攻撃ボタン位置・表示（上段） */
+  --disp-btn-02: ${configState.dispBtn02}; --pos-btn-02-top: ${configState.posBtn02Top}px; --pos-btn-02-left: ${configState.posBtn02Left}px; /* Btn 02 (LP) */
+  --disp-btn-03: ${configState.dispBtn03}; --pos-btn-03-top: ${configState.posBtn03Top}px; --pos-btn-03-left: ${configState.posBtn03Left}px; /* Btn 03 (MP) */
+  --disp-btn-05: ${configState.dispBtn05}; --pos-btn-05-top: ${configState.posBtn05Top}px; --pos-btn-05-left: ${configState.posBtn05Left}px; /* Btn 05 (HP) */
+  --disp-btn-04: ${configState.dispBtn04}; --pos-btn-04-top: ${configState.posBtn04Top}px; --pos-btn-04-left: ${configState.posBtn04Left}px; /* Btn 04 (L1) */
+
+  /* 攻撃ボタン位置・表示（下段） */
+  --disp-btn-00: ${configState.dispBtn00}; --pos-btn-00-top: ${configState.posBtn00Top}px; --pos-btn-00-left: ${configState.posBtn00Left}px; /* Btn 00 (LK) */
+  --disp-btn-01: ${configState.dispBtn01}; --pos-btn-01-top: ${configState.posBtn01Top}px; --pos-btn-01-left: ${configState.posBtn01Left}px; /* Btn 01 (MK) */
+  --disp-btn-07: ${configState.dispBtn07}; --pos-btn-07-top: ${configState.posBtn07Top}px; --pos-btn-07-left: ${configState.posBtn07Left}px; /* Btn 07 (HK) */
+  --disp-btn-06: ${configState.dispBtn06}; --pos-btn-06-top: ${configState.posBtn06Top}px; --pos-btn-06-left: ${configState.posBtn06Left}px; /* Btn 06 (L2) */
+
+  /* サブ・機能系ボタン位置・表示 */
+  --disp-btn-10: ${configState.dispBtn10}; --pos-btn-10-top: ${configState.posBtn10Top}px; --pos-btn-10-left: ${configState.posBtn10Left}px; /* Btn 10 (L3) */
+  --disp-btn-11: ${configState.dispBtn11}; --pos-btn-11-top: ${configState.posBtn11Top}px; --pos-btn-11-left: ${configState.posBtn11Left}px; /* Btn 11 (R3) */
+
+  /* システム系ボタン位置・表示 */
+  --disp-btn-08: ${configState.dispBtn08}; --pos-btn-08-top: ${configState.posBtn08Top}px; --pos-btn-08-left: ${configState.posBtn08Left}px; /* Btn 08 (View) */
+  --disp-btn-09: ${configState.dispBtn09}; --pos-btn-09-top: ${configState.posBtn09Top}px; --pos-btn-09-left: ${configState.posBtn09Left}px; /* Btn 09 (Menu) */
+}`;
+    }
+
+    function applyConfig() {
+      const css = generateCSSText();
+      dynamicStyleEl.textContent = css;
+      cssTextareaEl.value = css;
+      if (modalCssTextarea) modalCssTextarea.value = css;
+
+      // モードバッジ文字列の更新 (InputOverlay.html と同等)
+      const isLever = configState.leverDisplay === "flex";
+      const isMvmt  = configState.mvmtDisplay === "flex";
+      const isJump  = configState.jumpDisplay === "flex";
+
+      let modeText = "CUSTOM";
+      if (isLever && !isMvmt && !isJump) {
+        modeText = "LEVER";
+      } else if (isLever && !isMvmt && isJump) {
+        modeText = "LEVER + JUMP";
+      } else if (!isLever && isMvmt && isJump) {
+        modeText = "LEVERLESS (ALL-BUTTON)";
+      }
+      modeDisplayEl.textContent = `MODE: ${modeText}`;
+
+      // 各ボタンのラベルとサイズ属性の適用
+      ELEMENTS_DEF.forEach(def => {
+        if (def.hasLabel && def.labelKey) {
+          const el = document.getElementById(def.id);
+          const lbl = (configState[def.labelKey] !== undefined && configState[def.labelKey] !== null) ? String(configState[def.labelKey]) : "";
+          if (el) {
+            el.setAttribute("data-label", lbl);
+            const len = lbl.length;
+            el.classList.remove("text-long", "text-xlong");
+            if (len >= 5) el.classList.add("text-xlong");
+            else if (len >= 3) el.classList.add("text-long");
+          }
+        }
+      });
+
+      // 編集用の非表示要素判定（薄く表示するオプション用）
+      const leverEl = document.getElementById("lever-base");
+      if (leverEl) leverEl.classList.toggle("is-hidden-elem", configState.leverDisplay === "none");
+
+      const modeEl = document.getElementById("mode-display");
+      if (modeEl) modeEl.classList.toggle("is-hidden-elem", configState.modeDisplay === "none");
+
+      const logEl = document.getElementById("input-log");
+      if (logEl) logEl.classList.toggle("is-hidden-elem", configState.logDisplay === "none");
+
+      const b14 = document.getElementById("btn-14");
+      const b13 = document.getElementById("btn-13");
+      const b15 = document.getElementById("btn-15");
+      if (b14) b14.classList.toggle("is-hidden-elem", configState.mvmtDisplay === "none");
+      if (b13) b13.classList.toggle("is-hidden-elem", configState.mvmtDisplay === "none");
+      if (b15) b15.classList.toggle("is-hidden-elem", configState.mvmtDisplay === "none");
+
+      const b12 = document.getElementById("btn-12");
+      if (b12) b12.classList.toggle("is-hidden-elem", configState.jumpDisplay === "none");
+
+      ELEMENTS_DEF.forEach(def => {
+        if (def.hasDisp) {
+          const el = document.getElementById(def.id);
+          if (el) {
+            const isNone = (configState[`disp${def.keyName}`] === "none");
+            el.classList.toggle("is-hidden-elem", isNone);
+          }
+        }
+      });
+    }
+
+    /* ========================================================
+       UIパネル構築 & イベント連携
+       ======================================================== */
+    const selectedIds = new Set();
+    const buttonSettingsContainer = document.getElementById("button-settings-container");
+    const chkShowAllButtons = document.getElementById("chk-show-all-buttons");
+    const chkMultiSelect    = document.getElementById("chk-multi-select");
+
+    function renderPropertyEditor() {
+      buttonSettingsContainer.innerHTML = "";
+      const showAll = chkShowAllButtons.checked;
+
+      if (!showAll && selectedIds.size === 0) {
+        const isMouseSelect = chkMouseSelect && chkMouseSelect.checked;
+        const guideHtml = isMouseSelect
+          ? t("guideMouseOn")
+          : t("guideMouseOff");
+
+        buttonSettingsContainer.innerHTML = `
+          <div style="font-size: 11px; color: var(--ui-text-dim); text-align: center; padding: 20px 10px; border: 1px dashed var(--ui-panel-border); border-radius: 6px; line-height: 1.6;">
+            ${guideHtml}
+          </div>
+        `;
+        return;
+      }
+
+      // 表示順番は入力順ではなく、内部の並び順 (ELEMENTS_DEF 順)
+      const defsToRender = showAll 
+        ? ELEMENTS_DEF 
+        : ELEMENTS_DEF.filter(d => selectedIds.has(d.id));
+
+      const isMulti = chkMultiSelect && chkMultiSelect.checked;
+
+      defsToRender.forEach(def => {
+        const isSelected = selectedIds.has(def.id);
+        const card = document.createElement("div");
+        card.className = `btn-edit-card ${isSelected ? 'selected' : ''}`;
+        card.id = `edit-card-${def.id}`;
+
+        const topKey   = `pos${def.keyName}Top`;
+        const leftKey  = `pos${def.keyName}Left`;
+        const dispKey  = def.hasDisp ? `disp${def.keyName}` : null;
+        const labelKey = def.hasLabel ? def.labelKey : null;
+        const defDisplayName = (currentLang === "en" && def.isLever) ? t("leverBaseName") : def.name;
+
+        let dispControlHtml = "";
+        if (dispKey) {
+          const isChecked = configState[dispKey] === "flex";
+          dispControlHtml = `
+            <label style="font-size: 11px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+              <input type="checkbox" data-disp-key="${dispKey}" ${isChecked ? 'checked' : ''}>
+              ${t("btnDispLabel")}
+            </label>
+          `;
+        }
+
+        let labelControlHtml = "";
+        if (labelKey) {
+          const val = (configState[labelKey] !== undefined && configState[labelKey] !== null) ? String(configState[labelKey]) : "";
+          labelControlHtml = `
+            <div class="coord-field" style="grid-column: span 3;">
+              <label style="width: auto;">${t("btnTextLabel")}</label>
+              <div class="label-input-wrapper">
+                <input type="text" data-label-key="${labelKey}" value="${escapeHtml(val)}" maxlength="12" style="flex: 1;" autocomplete="off" spellcheck="false">
+                <span class="label-ghost-suffix" aria-hidden="true">
+                  <span class="ghost-invisible-text">${escapeHtml(val)}</span>
+                  <span class="ghost-warn-text"> ${t("ghostTextSuggestion")}</span>
+                </span>
+              </div>
+            </div>
+          `;
+        }
+
+        let sizeControlHtml = "";
+        if (def.hasSize && def.sizeKey) {
+          sizeControlHtml = `
+            <div class="coord-field">
+              <label>${t("btnSizeLabel")}</label>
+              <input type="number" data-key="${def.sizeKey}" value="${configState[def.sizeKey]}" min="20" max="150" step="1" inputmode="numeric" autocomplete="off" spellcheck="false">
+            </div>
+          `;
+        }
+
+        const removeBtnHtml = (isMulti && isSelected) ? `
+          <button type="button" class="btn-card-deselect" title="${t("deselectItem")}" style="background: none; border: none; color: var(--ui-text-dim); cursor: pointer; font-size: 13px; line-height: 1; padding: 2px 4px; border-radius: 3px;" onmouseover="this.style.color='#ff5252'" onmouseout="this.style.color='var(--ui-text-dim)'">✖</button>
+        ` : '';
+
+        card.innerHTML = `
+          <div class="btn-edit-header">
+            <span>${defDisplayName}</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              ${dispControlHtml}
+              <span class="btn-edit-badge">${def.id}</span>
+              ${removeBtnHtml}
+            </div>
+          </div>
+          <div class="coords-grid">
+            ${labelControlHtml}
+            <div class="coord-field">
+              <label>Top</label>
+              <input type="number" data-key="${topKey}" value="${configState[topKey]}" step="1" inputmode="numeric" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="coord-field">
+              <label>Left</label>
+              <input type="number" data-key="${leftKey}" value="${configState[leftKey]}" step="1" inputmode="numeric" autocomplete="off" spellcheck="false">
+            </div>
+            ${sizeControlHtml}
+          </div>
+        `;
+
+        // 個別解除ボタン
+        const removeBtn = card.querySelector(".btn-card-deselect");
+        if (removeBtn) {
+          removeBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            deselectElement(def.id);
+          });
+        }
+
+        // クリックで選択
+        card.addEventListener("click", (e) => {
+          if (!e.target.matches("input") && !e.target.matches("button")) {
+            selectElement(def.id);
+          }
+        });
+
+        // テキスト入力イベント
+        const textInp = card.querySelector("input[type='text']");
+        const ghostInv = card.querySelector(".ghost-invisible-text");
+        if (textInp) {
+          textInp.addEventListener("input", (e) => {
+            const key = e.target.dataset.labelKey;
+            configState[key] = e.target.value;
+            if (ghostInv) {
+              ghostInv.textContent = e.target.value;
+            }
+            applyConfig();
+          });
+        }
+
+        // 座標入力イベント
+        const numInputs = card.querySelectorAll("input[type='number']");
+        numInputs.forEach(inp => {
+          inp.addEventListener("input", (e) => {
+            const key = e.target.dataset.key;
+            const val = parseInt(e.target.value, 10);
+            if (!isNaN(val)) {
+              configState[key] = val;
+              if (key === "sizeLever") {
+                configState.sizeLeverBall = Math.round(val * (52 / 116));
+              }
+              applyConfig();
+            }
+          });
+        });
+
+        // 表示/非表示チェックボックスイベント
+        const dispCheckbox = card.querySelector("input[data-disp-key]");
+        if (dispCheckbox) {
+          dispCheckbox.addEventListener("change", (e) => {
+            const key = e.target.dataset.dispKey;
+            configState[key] = e.target.checked ? "flex" : "none";
+            applyConfig();
+          });
+        }
+
+        buttonSettingsContainer.appendChild(card);
+      });
+    }
+
+    const btnDeselect = document.getElementById("btn-deselect");
+    if (btnDeselect) {
+      btnDeselect.addEventListener("click", () => {
+        selectElement(null);
+      });
+    }
+
+    function selectElement(id) {
+      const isMulti = chkMultiSelect && chkMultiSelect.checked;
+
+      if (!id) {
+        selectedIds.clear();
+      } else if (isMulti) {
+        selectedIds.add(id);
+      } else {
+        selectedIds.clear();
+        selectedIds.add(id);
+      }
+
+      updateSelectionUI(id);
+    }
+
+    function deselectElement(id) {
+      selectedIds.delete(id);
+      updateSelectionUI();
+    }
+
+    function updateSelectionUI(lastSelectedId = null) {
+      // プレビュー上の枠線更新
+      document.querySelectorAll("#overlay-root .editor-selected").forEach(el => {
+        el.classList.remove("editor-selected");
+      });
+      selectedIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add("editor-selected");
+      });
+
+      // 「レバー・ボタン選択状態を解除」ボタンの活性/非活性同期
+      if (btnDeselect) {
+        const hasSelection = (selectedIds.size > 0);
+        btnDeselect.disabled = !hasSelection;
+        btnDeselect.style.opacity = hasSelection ? "1" : "0.5";
+        btnDeselect.style.cursor = hasSelection ? "pointer" : "default";
+      }
+
+      // 1px一括移動ボタン群の活性/非活性同期
+      const hasSelection = (selectedIds.size > 0);
+      document.querySelectorAll(".btn-nudge").forEach(b => {
+        b.disabled = !hasSelection;
+        b.style.opacity = hasSelection ? "1" : "0.5";
+        b.style.cursor = hasSelection ? "pointer" : "default";
+      });
+      renderPropertyEditor();
+
+      // カードが一覧にある場合は最後に選択したカードをスクロール表示
+      if (lastSelectedId && (chkShowAllButtons.checked || (chkMultiSelect && chkMultiSelect.checked))) {
+        const activeCard = document.getElementById(`edit-card-${lastSelectedId}`);
+        if (activeCard) {
+          activeCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+      }
+    }
+
+    chkShowAllButtons.addEventListener("change", renderPropertyEditor);
+
+    const multiMoveKeypad = document.getElementById("multi-move-keypad");
+    const btnSettingsDesc = document.getElementById("btn-settings-desc");
+
+    if (chkMultiSelect) {
+      chkMultiSelect.addEventListener("change", () => {
+        const isMulti = chkMultiSelect.checked;
+        if (multiMoveKeypad) {
+          multiMoveKeypad.style.display = isMulti ? "flex" : "none";
+        }
+        if (btnSettingsDesc) {
+          btnSettingsDesc.style.display = isMulti ? "none" : "block";
+        }
+        selectedIds.clear();
+        updateSelectionUI();
+      });
+    }
+
+    // 1pxずつ上下左右に移動できるボタンのイベント設定（長押し連打対応）
+    let nudgeTimer = null;
+    let nudgeInterval = null;
+
+    function stepNudge(dx, dy) {
+      if (selectedIds.size === 0) return;
+      selectedIds.forEach(id => {
+        const keyName = getElementKeyName(id);
+        if (keyName) {
+          configState[`pos${keyName}Top`]  += dy;
+          configState[`pos${keyName}Left`] += dx;
+        }
+      });
+      applyConfig();
+      renderPropertyEditor();
+    }
+
+    function stopNudge() {
+      if (nudgeTimer) { clearTimeout(nudgeTimer); nudgeTimer = null; }
+      if (nudgeInterval) { clearInterval(nudgeInterval); nudgeInterval = null; }
+    }
+
+    document.querySelectorAll(".btn-nudge").forEach(btn => {
+      const dx = parseInt(btn.dataset.dx, 10) || 0;
+      const dy = parseInt(btn.dataset.dy, 10) || 0;
+      let handledByPointer = false;
+
+      const startPress = (e) => {
+        if (e.button !== undefined && e.button !== 0) return;
+        if (btn.disabled || selectedIds.size === 0) return;
+        handledByPointer = true;
+        stopNudge();
+        stepNudge(dx, dy);
+
+        nudgeTimer = setTimeout(() => {
+          nudgeInterval = setInterval(() => {
+            stepNudge(dx, dy);
+          }, 16);
+        }, 433);
+      };
+
+      btn.addEventListener("mousedown", startPress);
+      btn.addEventListener("mouseup", stopNudge);
+      btn.addEventListener("mouseleave", stopNudge);
+
+      btn.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        startPress(e);
+      }, { passive: false });
+      btn.addEventListener("touchend", stopNudge);
+      btn.addEventListener("touchcancel", stopNudge);
+
+      btn.addEventListener("click", () => {
+        if (handledByPointer) {
+          handledByPointer = false;
+          return;
+        }
+        stepNudge(dx, dy);
+      });
+    });
+
+    window.addEventListener("mouseup", stopNudge);
+
+    /* ========================================================
+       モード・ログ表示設定チェックボックス
+       ======================================================== */
+    const chkDispMode = document.getElementById("chk-disp-mode");
+    const chkDispLog  = document.getElementById("chk-disp-log");
+
+    if (chkDispMode) {
+      chkDispMode.addEventListener("change", () => {
+        configState.modeDisplay = chkDispMode.checked ? "flex" : "none";
+        applyConfig();
+      });
+    }
+    if (chkDispLog) {
+      chkDispLog.addEventListener("change", () => {
+        configState.logDisplay = chkDispLog.checked ? "flex" : "none";
+        applyConfig();
+      });
+    }
+
+    /* ========================================================
+       移動操作タイプラジオボタン
+       ======================================================== */
+    const radioModes = document.querySelectorAll("input[name='ctrl-mode']");
+    radioModes.forEach(r => {
+      r.addEventListener("change", (e) => {
+        const val = e.target.value;
+        if (val === "lever") {
+          configState.leverDisplay = "flex";
+          configState.mvmtDisplay  = "none";
+          configState.jumpDisplay  = "none";
+        } else if (val === "lever-jump") {
+          configState.leverDisplay = "flex";
+          configState.mvmtDisplay  = "none";
+          configState.jumpDisplay  = "flex";
+        } else if (val === "leverless") {
+          configState.leverDisplay = "none";
+          configState.mvmtDisplay  = "flex";
+          configState.jumpDisplay  = "flex";
+        }
+        applyConfig();
+      });
+    });
+
+    /* ========================================================
+       倍率変更 & 警告表示（デフォルト100%）
+       ======================================================== */
+    const zoomSelect = document.getElementById("zoom-select");
+    const zoomWarning = document.getElementById("zoom-warning");
+    const previewWrapper = document.getElementById("preview-wrapper");
+    const previewOuter   = document.getElementById("preview-outer");
+
+    function updateZoom() {
+      const zoom = parseFloat(zoomSelect.value);
+      previewWrapper.style.transform = `scale(${zoom})`;
+      previewOuter.style.width  = `${640 * zoom}px`;
+      previewOuter.style.height = `${360 * zoom}px`;
+
+      if (zoom !== 1) {
+        zoomWarning.style.display = "inline";
+      } else {
+        zoomWarning.style.display = "none";
+      }
+    }
+    zoomSelect.addEventListener("change", updateZoom);
+    updateZoom(); // 初期化実行
+
+    /* ========================================================
+       言語切替イベント
+       ======================================================== */
+    const langSelect = document.getElementById("lang-select");
+    if (langSelect) {
+      langSelect.addEventListener("change", (e) => {
+        applyLanguage(e.target.value);
+      });
+    }
+
+    /* ========================================================
+       編集用非表示ボタンの薄表示切替
+       ======================================================== */
+    const chkShowHiddenButtons = document.getElementById("chk-show-hidden-buttons");
+    if (chkShowHiddenButtons) {
+      chkShowHiddenButtons.addEventListener("change", () => {
+        document.body.classList.toggle("show-hidden-buttons", chkShowHiddenButtons.checked);
+      });
+    }
+
+    /* ========================================================
+       CSS拡大モーダル
+       ======================================================== */
+    const btnExpandCss    = document.getElementById("btn-expand-css");
+    const modalCssExpand  = document.getElementById("modal-css-expand");
+    const btnCloseModal   = document.getElementById("btn-close-modal");
+    const btnModalCopyCss = document.getElementById("btn-modal-copy-css");
+
+    if (btnExpandCss && modalCssExpand) {
+      btnExpandCss.addEventListener("click", () => {
+        if (modalCssTextarea) modalCssTextarea.value = cssTextareaEl.value;
+        modalCssExpand.style.display = "flex";
+      });
+      if (btnCloseModal) {
+        btnCloseModal.addEventListener("click", () => {
+          modalCssExpand.style.display = "none";
+        });
+      }
+      modalCssExpand.addEventListener("click", (e) => {
+        if (e.target === modalCssExpand) {
+          modalCssExpand.style.display = "none";
+        }
+      });
+      if (btnModalCopyCss) {
+        btnModalCopyCss.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(modalCssTextarea.value);
+            showToast(t("toastCopied"));
+          } catch (err) {
+            modalCssTextarea.select();
+            document.execCommand("copy");
+            showToast(t("toastCopied"));
+          }
+        });
+      }
+    }
+
+    /* ========================================================
+       ファイル操作系ボタンの表示切替
+       ======================================================== */
+    const chkShowFileOps = document.getElementById("chk-show-file-ops");
+    const fileActionsGroup = document.getElementById("file-actions-group");
+    chkShowFileOps.addEventListener("change", () => {
+      fileActionsGroup.style.display = chkShowFileOps.checked ? "flex" : "none";
+    });
+
+    /* ========================================================
+       マウス選択 & マウスドラッグ機能
+       ======================================================== */
+    const chkMouseSelect = document.getElementById("chk-mouse-select");
+    const chkMouseDrag   = document.getElementById("chk-mouse-drag");
+    const lblMouseDrag   = document.getElementById("lbl-mouse-drag");
+
+    chkMouseSelect.addEventListener("change", () => {
+      const isSelectOn = chkMouseSelect.checked;
+      document.body.classList.toggle("mouse-select-enabled", isSelectOn);
+
+      // マウス移動チェックボックスの連動制御
+      chkMouseDrag.disabled = !isSelectOn;
+      lblMouseDrag.style.opacity = isSelectOn ? "1" : "0.5";
+      if (!isSelectOn) {
+        chkMouseDrag.checked = false;
+        document.body.classList.remove("mouse-drag-enabled");
+      }
+
+      // 未選択時の案内ガイド文言を更新
+      renderPropertyEditor();
+    });
+
+    chkMouseDrag.addEventListener("change", () => {
+      document.body.classList.toggle("mouse-drag-enabled", chkMouseDrag.checked);
+    });
+
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    const dragStartPositions = new Map();
+
+    function getElementKeyName(id) {
+      const found = ELEMENTS_DEF.find(d => d.id === id);
+      return found ? found.keyName : null;
+    }
+
+    document.getElementById("overlay-root").addEventListener("mousedown", (e) => {
+      if (!chkMouseSelect.checked) return;
+
+      const target = e.target.closest(".btn, #lever-base");
+      if (!target) return;
+
+      const id = target.id;
+      selectElement(id);
+
+      // 移動が無効の場合は選択のみでドラッグは開始しない
+      if (!chkMouseDrag.checked) return;
+
+      isDragging = true;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      dragStartPositions.clear();
+
+      selectedIds.forEach(selId => {
+        const keyName = getElementKeyName(selId);
+        if (keyName) {
+          dragStartPositions.set(selId, {
+            keyName: keyName,
+            top: configState[`pos${keyName}Top`],
+            left: configState[`pos${keyName}Left`]
+          });
+        }
+      });
+
+      e.preventDefault();
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!isDragging || dragStartPositions.size === 0) return;
+
+      const zoom = parseFloat(zoomSelect.value);
+      const dx = (e.clientX - dragStartX) / zoom;
+      const dy = (e.clientY - dragStartY) / zoom;
+
+      dragStartPositions.forEach(pos => {
+        configState[`pos${pos.keyName}Top`]  = Math.round(pos.top + dy);
+        configState[`pos${pos.keyName}Left`] = Math.round(pos.left + dx);
+      });
+
+      applyConfig();
+      renderPropertyEditor();
+    });
+
+    window.addEventListener("mouseup", () => {
+      isDragging = false;
+      dragStartPositions.clear();
+    });
+
+    /* ========================================================
+       クリップボードにコピー & トースト
+       ======================================================== */
+    const btnCopyCss = document.getElementById("btn-copy-css");
+    const toastEl = document.getElementById("toast");
+    let toastTimer = null;
+
+    function showToast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add("show");
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toastEl.classList.remove("show");
+      }, 2000);
+    }
+
+    btnCopyCss.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(cssTextareaEl.value);
+        showToast(t("toastCopied"));
+      } catch (err) {
+        cssTextareaEl.select();
+        document.execCommand("copy");
+        showToast(t("toastCopied"));
+      }
+    });
+
+    /* ========================================================
+       ファイル保存 & ファイル読み込み
+       ======================================================== */
+    const btnSaveCss = document.getElementById("btn-save-css");
+    const btnLoadCss = document.getElementById("btn-load-css");
+    const fileInputCss = document.getElementById("file-input-css");
+
+    /* 未保存時の離脱・リロード前確認 (beforeunload) */
+    let savedCssText = "";
+
+    window.addEventListener("beforeunload", (e) => {
+      if (savedCssText && generateCSSText() !== savedCssText) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    });
+
+    btnSaveCss.addEventListener("click", async () => {
+      const content = cssTextareaEl.value;
+      // showSaveFilePicker API（モダンブラウザ用）
+      if (window.showSaveFilePicker) {
+        try {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: "InputOverlay_Custom.css",
+            types: [{
+              description: t("cssFileDesc"),
+              accept: { "text/css": [".css"] }
+            }]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(content);
+          await writable.close();
+          savedCssText = generateCSSText();
+          showToast(t("toastSaved"));
+          return;
+        } catch (err) {
+          if (err.name === "AbortError") return;
+        }
+      }
+
+      // フォールバック：Blobダウンロード
+      const blob = new Blob([content], { type: "text/css;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "InputOverlay_Custom.css";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      savedCssText = generateCSSText();
+      showToast(t("toastSaved"));
+    });
+
+    btnLoadCss.addEventListener("click", () => {
+      fileInputCss.value = "";
+      fileInputCss.click();
+    });
+
+    fileInputCss.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const content = event.target.result;
+        parseAndApplyCSS(content);
+      };
+      reader.readAsText(file);
+    });
+
+    function parseAndApplyCSS(cssString) {
+      let matchedCount = 0;
+      const parsedUpdates = {};
+      let hasSizeLever = false;
+      let hasSizeLeverBall = false;
+
+      // コメントを除去してから全CSS変数を汎用的に正規表現で抽出
+      const cleanCss = cssString.replace(/\/\*[\s\S]*?\*\//g, "");
+      const regex = /(--[a-zA-Z0-9\-]+)\s*:\s*("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^;]+);/g;
+      let match;
+      while ((match = regex.exec(cleanCss)) !== null) {
+        const prop = match[1].trim();
+        const rawVal = match[2].trim();
+        const val = rawVal.replace(/^['"]|['"]$/g, "").replace(/\\([\\/"])/g, "$1");
+
+        if (prop === "--lever-display" && (val === "flex" || val === "none")) { parsedUpdates.leverDisplay = val; matchedCount++; }
+        else if (prop === "--mvmt-display" && (val === "flex" || val === "none")) { parsedUpdates.mvmtDisplay = val; matchedCount++; }
+        else if (prop === "--jump-display" && (val === "flex" || val === "none")) { parsedUpdates.jumpDisplay = val; matchedCount++; }
+        else if (prop === "--mode-display" && (val === "flex" || val === "none")) { parsedUpdates.modeDisplay = val; matchedCount++; }
+        else if (prop === "--log-display"  && (val === "flex" || val === "none")) { parsedUpdates.logDisplay = val; matchedCount++; }
+
+        // ラベル設定
+        else if (prop === "--label-jump") { parsedUpdates.labelJump = val; matchedCount++; }
+        else if (prop.startsWith("--label-btn-")) {
+          const num = prop.replace("--label-btn-", "").padStart(2, "0");
+          const key = `labelBtn${num}`;
+          if (key in configState) {
+            parsedUpdates[key] = val;
+            matchedCount++;
+          }
+        }
+
+        // 座標・表示設定
+        else if (prop === "--pos-lever-top")  { const n = parseInt(val, 10); if (!isNaN(n)) { parsedUpdates.posLeverTop  = n; matchedCount++; } }
+        else if (prop === "--pos-lever-left") { const n = parseInt(val, 10); if (!isNaN(n)) { parsedUpdates.posLeverLeft = n; matchedCount++; } }
+        else if (prop === "--pos-jump-top")   { const n = parseInt(val, 10); if (!isNaN(n)) { parsedUpdates.posJumpTop   = n; matchedCount++; } }
+        else if (prop === "--pos-jump-left")  { const n = parseInt(val, 10); if (!isNaN(n)) { parsedUpdates.posJumpLeft  = n; matchedCount++; } }
+
+        // サイズ設定 (個別指定)
+        else if (prop === "--size-lever")      { const n = parseInt(val, 10); if (!isNaN(n)) { parsedUpdates.sizeLever = n; hasSizeLever = true; matchedCount++; } }
+        else if (prop === "--size-lever-ball") { const n = parseInt(val, 10); if (!isNaN(n)) { parsedUpdates.sizeLeverBall = n; hasSizeLeverBall = true; matchedCount++; } }
+        else if (prop === "--size-jump")       { const n = parseInt(val, 10); if (!isNaN(n)) { parsedUpdates.sizeJump = n; matchedCount++; } }
+        else if (prop.startsWith("--size-btn-")) {
+          const num = prop.replace("--size-btn-", "").padStart(2, "0");
+          const key = `sizeBtn${num}`;
+          const n = parseInt(val, 10);
+          if (key in configState && !isNaN(n)) {
+            parsedUpdates[key] = n;
+            matchedCount++;
+          }
+        }
+        else {
+          const mDisp = prop.match(/^--disp-btn-(\d+)$/);
+          if (mDisp && (val === "flex" || val === "none")) {
+            const key = `dispBtn${mDisp[1].padStart(2, "0")}`;
+            if (key in configState) {
+              parsedUpdates[key] = val;
+              matchedCount++;
+            }
+          }
+          const mTop = prop.match(/^--pos-btn-(\d+)-top$/);
+          if (mTop) {
+            const key = `posBtn${mTop[1].padStart(2, "0")}Top`;
+            const n = parseInt(val, 10);
+            if (key in configState && !isNaN(n)) {
+              parsedUpdates[key] = n;
+              matchedCount++;
+            }
+          }
+          const mLeft = prop.match(/^--pos-btn-(\d+)-left$/);
+          if (mLeft) {
+            const key = `posBtn${mLeft[1].padStart(2, "0")}Left`;
+            const n = parseInt(val, 10);
+            if (key in configState && !isNaN(n)) {
+              parsedUpdates[key] = n;
+              matchedCount++;
+            }
+          }
+        }
+      }
+
+      if (matchedCount > 0) {
+        Object.assign(configState, DEFAULT_CONFIG_STATE, parsedUpdates);
+        if (hasSizeLever && !hasSizeLeverBall) {
+          configState.sizeLeverBall = Math.round(configState.sizeLever * (52 / 116));
+        }
+
+        // モード・ログ表示チェックボックスの同期
+        if (chkDispMode) chkDispMode.checked = (configState.modeDisplay === "flex");
+        if (chkDispLog)  chkDispLog.checked  = (configState.logDisplay === "flex");
+
+        // ラジオボタンの選択同期
+        const isLever = (configState.leverDisplay === "flex");
+        const isMvmt  = (configState.mvmtDisplay === "flex");
+        const isJump  = (configState.jumpDisplay === "flex");
+        const radioLever     = document.querySelector("input[name='ctrl-mode'][value='lever']");
+        const radioLeverJump = document.querySelector("input[name='ctrl-mode'][value='lever-jump']");
+        const radioLeverless = document.querySelector("input[name='ctrl-mode'][value='leverless']");
+
+        if (isLever && !isMvmt && !isJump) {
+          if (radioLever) radioLever.checked = true;
+        } else if (isLever && !isMvmt && isJump) {
+          if (radioLeverJump) radioLeverJump.checked = true;
+        } else if (!isLever && isMvmt && isJump) {
+          if (radioLeverless) radioLeverless.checked = true;
+        } else {
+          if (radioLever) radioLever.checked = false;
+          if (radioLeverJump) radioLeverJump.checked = false;
+          if (radioLeverless) radioLeverless.checked = false;
+        }
+
+        applyConfig();
+        renderPropertyEditor();
+        savedCssText = generateCSSText();
+        showToast(t("toastLoaded").replace("{count}", matchedCount));
+      } else {
+        alert(t("alertLoadInvalid"));
+      }
+    }
+
+    /* ========================================================
+       Gamepad API 連携ループ（InputOverlay.html と同等 + 選択機能）
+       ======================================================== */
+    const leverBall = document.getElementById("lever-ball");
+    const inputLog  = document.getElementById("input-log");
+    const btnIndices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+
+    let logHistory = [];
+    let lastStateStr = "";
+    let prevPressedBtns = [];
+    let prevStickActive = false;
+
+    function pollGamepad() {
+      const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+      const targetGamepads = [];
+
+      for (let i = 0; i < gamepads.length; i++) {
+        if (gamepads[i] && gamepads[i].connected) {
+          targetGamepads.push(gamepads[i]);
+        }
+      }
+
+      if (targetGamepads.length > 0) {
+        const pressedBtns = [];
+        let rx = 0;
+        let ry = 0;
+        const deadzone = 0.25;
+
+        // 全接続コントローラーの入力を合算
+        for (let p = 0; p < targetGamepads.length; p++) {
+          const gp = targetGamepads[p];
+          if (gp.buttons) {
+            for (let i = 0; i < gp.buttons.length; i++) {
+              if (gp.buttons[i] && gp.buttons[i].pressed) {
+                pressedBtns[i] = true;
+              }
+            }
+          }
+          if (gp.axes && gp.axes.length >= 2) {
+            if (Math.abs(gp.axes[0]) > deadzone && Math.abs(gp.axes[0]) > Math.abs(rx)) rx = gp.axes[0];
+            if (Math.abs(gp.axes[1]) > deadzone && Math.abs(gp.axes[1]) > Math.abs(ry)) ry = gp.axes[1];
+          }
+        }
+
+        // Gamepadで新たに入力のあったボタン（立ち上がりエッジ）をエディタで自動選択
+        // ※移動系操作（12〜15）時、レバー表示モードならレバーを選択
+        const isLeverActive = (configState.leverDisplay === "flex");
+        for (let i = 0; i < pressedBtns.length; i++) {
+          if (pressedBtns[i] && !prevPressedBtns[i]) {
+            const isMvmtInput = (i >= 12 && i <= 15);
+            let targetId = null;
+
+            if (isLeverActive && isMvmtInput) {
+              // レバー＋親指ジャンプモード時、Btn 12（ジャンプボタン）は単独ボタンとして選択
+              if (i === 12 && configState.jumpDisplay === "flex") {
+                targetId = "btn-12";
+              } else {
+                // レバーの移動入力としてレバー本体を選択
+                targetId = "lever-base";
+              }
+            } else {
+              targetId = (i === 12) ? "btn-12" : `btn-${String(i).padStart(2, "0")}`;
+            }
+
+            if (targetId && document.getElementById(targetId)) {
+              const isMulti = chkMultiSelect && chkMultiSelect.checked;
+              const alreadySelected = isMulti 
+                ? selectedIds.has(targetId) 
+                : (selectedIds.size === 1 && selectedIds.has(targetId));
+              if (!alreadySelected) {
+                selectElement(targetId);
+              }
+            }
+          }
+        }
+
+        // アナログスティック操作（立ち上がりエッジ）でレバーを自動選択
+        const isStickActive = (Math.abs(rx) > 0.4 || Math.abs(ry) > 0.4);
+        if (isLeverActive && isStickActive && !prevStickActive) {
+          const isMulti = chkMultiSelect && chkMultiSelect.checked;
+          const alreadySelected = isMulti 
+            ? selectedIds.has("lever-base") 
+            : (selectedIds.size === 1 && selectedIds.has("lever-base"));
+          if (!alreadySelected) {
+            selectElement("lever-base");
+          }
+        }
+
+        prevPressedBtns = pressedBtns.slice();
+        prevStickActive = isStickActive;
+
+        // ボタンの.active反映
+        for (let i = 0; i < btnIndices.length; i++) {
+          const idx = btnIndices[i];
+          const el = document.getElementById(`btn-${String(idx).padStart(2, "0")}`);
+          if (el) {
+            if (pressedBtns[idx]) el.classList.add("active");
+            else el.classList.remove("active");
+          }
+        }
+
+        // 方向補正
+        if (pressedBtns[14]) rx = -1;
+        if (pressedBtns[15]) rx = 1;
+        if (pressedBtns[13]) ry = 1;
+        if (pressedBtns[12] || ry < -0.5) ry = -1;
+
+        // レバーボール描画
+        if (leverBall) {
+          const isJump = (configState.jumpDisplay === "flex");
+          const leverRy = (isJump && ry < 0) ? 0 : ry;
+          const stroke = Math.round(((configState.sizeLever || 116) - (configState.sizeLeverBall || 52)) / 2 + 2);
+          leverBall.style.transform = `translate(${rx * stroke}px, ${leverRy * stroke}px)`;
+        }
+
+        // 入力ログ生成
+        const activeBtns = [];
+        if (rx < -0.5 && ry > 0.5) activeBtns.push("↙");
+        else if (rx > 0.5 && ry > 0.5) activeBtns.push("↘");
+        else if (rx < -0.5 && ry < -0.5) activeBtns.push("↖");
+        else if (rx > 0.5 && ry < -0.5) activeBtns.push("↗");
+        else if (rx < -0.5) activeBtns.push("←");
+        else if (rx > 0.5) activeBtns.push("→");
+        else if (ry > 0.5) activeBtns.push("↓");
+        else if (ry < -0.5) activeBtns.push("↑");
+
+        for (let i = 0; i < 12; i++) {
+          if (pressedBtns[i]) {
+            const el = document.getElementById(`btn-${String(i).padStart(2, "0")}`);
+            if (el && !el.classList.contains("is-hidden-elem") && getComputedStyle(el).display !== "none") {
+              const lbl = el.getAttribute("data-label") || String(i);
+              if (!activeBtns.includes(lbl)) activeBtns.push(lbl);
+            }
+          }
+        }
+
+        const currentStateStr = activeBtns.join("+");
+        if (currentStateStr !== lastStateStr && currentStateStr !== "") {
+          logHistory.unshift(currentStateStr);
+          if (logHistory.length > 25) logHistory.pop();
+          inputLog.innerHTML = logHistory.map(s => `<span class="log-item">${escapeHtml(s)}</span>`).join("");
+          lastStateStr = currentStateStr;
+        } else if (currentStateStr === "") {
+          lastStateStr = "";
+        }
+      } else {
+        prevPressedBtns = [];
+        prevStickActive = false;
+      }
+
+      requestAnimationFrame(pollGamepad);
+    }
+
+    // 初期起動（ブラウザ言語に応じた言語でレンダリング）
+    applyLanguage(currentLang);
+    applyConfig();
+    updateSelectionUI();
+    savedCssText = generateCSSText();
+    requestAnimationFrame(pollGamepad);
+  </script>
+</body>
+</html>

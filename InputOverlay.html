@@ -454,7 +454,8 @@
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   function applyLabelAndAdjustSize(el, label) {
@@ -503,7 +504,7 @@
           rawLabel = rootStyle.getPropertyValue(`--label-btn-${idx}`).trim();
         }
         if (rawLabel) {
-          const label = rawLabel.replace(/^['"]|['"]$/g, '').replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+          const label = rawLabel.replace(/^['"]|['"]$/g, '').replace(/\\([\\/"])/g, '$1');
           applyLabelAndAdjustSize(el, label);
         }
       }

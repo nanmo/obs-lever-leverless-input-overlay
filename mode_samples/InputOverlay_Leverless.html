@@ -6,6 +6,8 @@
   <style>
   /*
    * =================================================================
+   * obs-lever-leverless-input-overlay v1.0.1
+   * =================================================================
    * 【調整・開発時のメモ / 動作確認手順】
    * =================================================================
    * ■ 通常のブラウザで確認しながら調整する場合
@@ -551,23 +553,40 @@
   let logHistory = [];
   let lastStateStr = "";
 
-  function pollGamepad() {
-    const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
-    const targetGamepads = [];
+  function resetInputState() {
+    for (let i = 0; i < btnIndices.length; i++) {
+      const idx = btnIndices[i];
+      const el = getBtnElement(idx);
+      if (el) {
+        el.classList.remove('active');
+      }
+    }
+    if (leverBall) {
+      leverBall.style.transform = 'translate(0px, 0px)';
+    }
+    lastStateStr = "";
+  }
 
-    if (gamepads) {
-      if (targetGamepadIndex !== null) {
-        if (gamepads[targetGamepadIndex] && gamepads[targetGamepadIndex].connected) {
-          targetGamepads.push(gamepads[targetGamepadIndex]);
-        }
-      } else {
-        for (let i = 0; i < gamepads.length; i++) {
-          if (gamepads[i] && gamepads[i].connected) {
-            targetGamepads.push(gamepads[i]);
+  window.addEventListener('gamepaddisconnected', resetInputState);
+
+  function pollGamepad() {
+    try {
+      const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+      const targetGamepads = [];
+
+      if (gamepads) {
+        if (targetGamepadIndex !== null) {
+          if (gamepads[targetGamepadIndex] && gamepads[targetGamepadIndex].connected) {
+            targetGamepads.push(gamepads[targetGamepadIndex]);
+          }
+        } else {
+          for (let i = 0; i < gamepads.length; i++) {
+            if (gamepads[i] && gamepads[i].connected) {
+              targetGamepads.push(gamepads[i]);
+            }
           }
         }
       }
-    }
 
     if (targetGamepads.length > 0) {
       const pressedBtns = [];
@@ -650,6 +669,11 @@
       } else if (currentStateStr === "") {
         lastStateStr = "";
       }
+      } else {
+        resetInputState();
+      }
+    } catch (err) {
+      console.error("Gamepad poll error:", err);
     }
 
     requestAnimationFrame(pollGamepad);

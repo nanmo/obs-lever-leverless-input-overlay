@@ -11,7 +11,7 @@
   <style>
     /*
      * =================================================================
-     * 天板レイアウトさん - for obs-lever-leverless-input-overlay
+     * 天板レイアウトさん v1.0.1 - for obs-lever-leverless-input-overlay
      * License: 0BSD (SPDX-License-Identifier: 0BSD)
      * Copyright (C) 2026 Nanmo
      * =================================================================
@@ -721,7 +721,7 @@
     <div class="title-group">
       <div class="title-main-row">
         <h1 data-i18n="appTitle">天板レイアウトさん</h1>
-        <span class="version-badge">v1.0.0</span>
+        <span class="version-badge">v1.0.1</span>
       </div>
       <div class="subtitle">
         for <a href="https://github.com/nanmo/obs-lever-leverless-input-overlay" target="_blank" rel="noopener noreferrer">obs-lever-leverless-input-overlay</a>
@@ -2216,15 +2216,34 @@
     let prevPressedBtns = [];
     let prevStickActive = false;
 
-    function pollGamepad() {
-      const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
-      const targetGamepads = [];
-
-      for (let i = 0; i < gamepads.length; i++) {
-        if (gamepads[i] && gamepads[i].connected) {
-          targetGamepads.push(gamepads[i]);
+    function resetInputState() {
+      for (let i = 0; i < btnIndices.length; i++) {
+        const idx = btnIndices[i];
+        const el = document.getElementById("btn-" + String(idx).padStart(2, "0"));
+        if (el) {
+          el.classList.remove("active");
         }
       }
+      if (leverBall) {
+        leverBall.style.transform = "translate(0px, 0px)";
+      }
+      lastStateStr = "";
+      prevPressedBtns = [];
+      prevStickActive = false;
+    }
+
+    window.addEventListener("gamepaddisconnected", resetInputState);
+
+    function pollGamepad() {
+      try {
+        const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+        const targetGamepads = [];
+
+        for (let i = 0; i < gamepads.length; i++) {
+          if (gamepads[i] && gamepads[i].connected) {
+            targetGamepads.push(gamepads[i]);
+          }
+        }
 
       if (targetGamepads.length > 0) {
         const pressedBtns = [];
@@ -2298,7 +2317,7 @@
         // ボタンの.active反映
         for (let i = 0; i < btnIndices.length; i++) {
           const idx = btnIndices[i];
-          const el = document.getElementById(`btn-${String(idx).padStart(2, "0")}`);
+          const el = document.getElementById("btn-" + String(idx).padStart(2, "0"));
           if (el) {
             if (pressedBtns[idx]) el.classList.add("active");
             else el.classList.remove("active");
@@ -2332,7 +2351,7 @@
 
         for (let i = 0; i < 12; i++) {
           if (pressedBtns[i]) {
-            const el = document.getElementById(`btn-${String(i).padStart(2, "0")}`);
+            const el = document.getElementById("btn-" + String(i).padStart(2, "0"));
             if (el && !el.classList.contains("is-hidden-elem") && getComputedStyle(el).display !== "none") {
               const lbl = el.getAttribute("data-label") || String(i);
               if (!activeBtns.includes(lbl)) activeBtns.push(lbl);
@@ -2349,9 +2368,11 @@
         } else if (currentStateStr === "") {
           lastStateStr = "";
         }
-      } else {
-        prevPressedBtns = [];
-        prevStickActive = false;
+        } else {
+          resetInputState();
+        }
+      } catch (err) {
+        console.error("Gamepad poll error:", err);
       }
 
       requestAnimationFrame(pollGamepad);

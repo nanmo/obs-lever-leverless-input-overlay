@@ -24,6 +24,18 @@ OBS Studioのブラウザソースや一般的なWebブラウザ上で動作す�
 ---
 
 > [!IMPORTANT]
+> **【OBS 33系におけるコントローラー入力停止問題について】**  
+> 現在、OBS 33系では、OBSにフォーカスが無い間はブラウザソースへコントローラー入力が届かず、表示が止まる問題が確認されています。OBS側の問題のため、本ツール側では修正できません。(OBS側のissueで修正に向けた動きがあることは確認できます)  
+> 当面の回避策は、OBS 32系統のバージョンを利用いただくこと、になります。
+> 
+> 詳細・最新状況:
+> - OBS側のissue: https://github.com/obsproject/obs-studio/issues/14083
+> - OBS側のissue（Windows）: https://github.com/obsproject/obs-studio/issues/14139
+> - GPV(GamePad Viewer) の状況ページ: https://status.gamepadviewer.com/obs-33-background-input/
+
+---
+
+> [!IMPORTANT]
 > **【Steamゲーム起動時などにオーバーレイの画面更新が停止する場合】**
 > - **現象・原因**: Steam Inputの排他フックやケーブル抜き差し等により、コントローラーの瞬断・接続変更が発生してオーバーレイの画面更新が停止することがあります。
 > - **対策 (v1.0.1)**: 接続状態の変更に追従しやすくする処理を追加しました。すでにダウンロード済みの方は **最新版の再ダウンロード** を推奨します。InputOverlay.htmlのファイル先頭付近にバージョン表記を入れるようにしました。

@@ -693,12 +693,12 @@
     body.mouse-select-enabled #lever-base {
       cursor: pointer;
     }
-    body.mouse-drag-enabled .btn,
-    body.mouse-drag-enabled #lever-base {
+    body.mouse-drag-enabled:not(.swap-mode-active) .btn,
+    body.mouse-drag-enabled:not(.swap-mode-active) #lever-base {
       cursor: grab;
     }
-    body.mouse-drag-enabled .btn:active,
-    body.mouse-drag-enabled #lever-base:active {
+    body.mouse-drag-enabled:not(.swap-mode-active) .btn:active,
+    body.mouse-drag-enabled:not(.swap-mode-active) #lever-base:active {
       cursor: grabbing;
     }
 
@@ -708,6 +708,31 @@
       outline-offset: 3px !important;
       box-shadow: 0 0 16px rgba(255, 204, 0, 0.9) !important;
       z-index: 99 !important;
+    }
+
+    /* ボタン位置入れ替えモード時のスタイル */
+    body.swap-mode-active #lever-base {
+      cursor: not-allowed !important;
+      opacity: 0.6 !important;
+    }
+    body.swap-mode-active .btn-edit-card input {
+      opacity: 0.55 !important;
+      cursor: not-allowed !important;
+      pointer-events: none !important;
+    }
+    body.swap-mode-active .btn-edit-card .coord-field label {
+      opacity: 0.6 !important;
+    }
+    body.swap-mode-active #lbl-show-all-buttons,
+    body.swap-mode-active #lbl-mouse-drag,
+    body:not(.mouse-select-enabled) #lbl-mouse-drag {
+      cursor: not-allowed !important;
+      opacity: 0.5 !important;
+    }
+    body.swap-mode-active #chk-show-all-buttons,
+    body.swap-mode-active #chk-mouse-drag,
+    body:not(.mouse-select-enabled) #chk-mouse-drag {
+      cursor: not-allowed !important;
     }
   </style>
 
@@ -775,13 +800,25 @@
         </label>
       </div>
       <div class="tool-settings-row">
-        <label>
+        <label id="lbl-show-all-buttons">
           <input type="checkbox" id="chk-show-all-buttons">
           <span data-i18n="showAllBtns">常にすべての表示設定を表示</span>
         </label>
         <label style="margin-left: 12px;">
           <input type="checkbox" id="chk-show-file-ops">
           <span data-i18n="showFileOps">ファイル操作系ボタンを表示</span>
+        </label>
+      </div>
+      <div class="tool-settings-row">
+        <label>
+          <span style="font-weight: 500;" data-i18n="modeSelectLabel">モード:</span>
+          <select id="sel-operation-mode">
+            <option value="move" data-i18n="modeMove">レバー・ボタンの移動</option>
+            <option value="swap" data-i18n="modeSwap">ボタン位置の入れ替え</option>
+          </select>
+          <span id="swap-mode-top-notice" style="font-size: 11px; color: var(--ui-text-dim); margin-left: 2px; display: none;" data-i18n="swapModeNotice">
+            （2ボタン選択専用・数値編集&ドラッグ無効・レバー対象外）
+          </span>
         </label>
       </div>
     </div>
@@ -930,8 +967,8 @@
           </div>
         </div>
 
-        <!-- レバー・ボタン表示設定 -->
-        <div class="section-card">
+        <!-- レバー・ボタン表示設定（通常モード時） -->
+        <div class="section-card" id="card-btn-settings">
           <div class="section-title" data-i18n="btnSettingsTitle">レバー・ボタン表示設定</div>
           <div>
             <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; user-select: none;">
@@ -961,6 +998,33 @@
           <div id="button-settings-container" style="display: flex; flex-direction: column; gap: 8px;">
             <!-- JSで動的生成 -->
           </div>
+        </div>
+
+        <!-- ボタン位置入れ替えモード操作パネル（同階層の独立セクションカード） -->
+        <div class="section-card" id="card-swap-mode" style="display: none; border-color: rgba(0, 210, 255, 0.4); background: rgba(0, 210, 255, 0.05); flex-direction: column; gap: 10px;">
+          <div class="section-title" style="display: flex; align-items: center; justify-content: space-between;">
+            <span style="color: var(--ui-accent);" data-i18n="swapPanelTitle">🔄 ボタン位置入れ替え</span>
+            <span id="swap-count-badge" style="font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 4px; background: rgba(0, 210, 255, 0.2); border: 1px solid rgba(0, 210, 255, 0.5); color: #fff;">0 / 2</span>
+          </div>
+
+          <div id="swap-guide-text" style="font-size: 12px; color: var(--ui-text); line-height: 1.5; padding: 8px 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--ui-panel-border); border-radius: 5px;" data-i18n="swapGuideNone">
+            入れ替えたいボタンを1つ選択してください (0/2)
+          </div>
+
+          <!-- 選択中ボタン2つの情報表示コンテナ -->
+          <div id="swap-selected-cards" style="display: flex; flex-direction: column; gap: 6px;"></div>
+
+          <div style="font-size: 11px; color: var(--ui-warning); line-height: 1.4;" data-i18n="swapRestrictionsNotice">
+            ※入れ替えモード中：各種数値の直接編集・マウス移動は無効化（2ボタン専用・レバー対象外）
+          </div>
+
+          <button type="button" id="btn-execute-swap" class="btn-action" style="width: 100%; justify-content: center; padding: 8px 10px; font-size: 13px; background: var(--ui-accent); color: #000; font-weight: bold; opacity: 0.5; cursor: default;" disabled data-i18n="btnExecuteSwap">
+            🔄 選択した2つの位置を入れ替える
+          </button>
+
+          <button type="button" id="btn-swap-deselect" class="btn-action btn-secondary" style="width: 100%; justify-content: center; padding: 6px 10px; font-size: 11px; opacity: 0.5; cursor: default;" disabled data-i18n="btnDeselect">
+            レバー・ボタン選択状態を解除
+          </button>
         </div>
       </div>
     </section>
@@ -1181,6 +1245,22 @@
         btnSizeLabel: "直径",
         leverBaseName: "レバー本体",
 
+        modeSelectLabel: "モード:",
+        modeMove: "レバー・ボタンの移動",
+        modeSwap: "ボタン位置の入れ替え",
+        swapModeNotice: "（2ボタン選択専用・数値編集&ドラッグ無効・レバー対象外）",
+        swapPanelTitle: "🔄 ボタン位置入れ替え",
+        swapRestrictionsNotice: "※入れ替えモード中：各種数値の直接編集・マウス移動は無効化（2ボタン専用・レバー対象外）",
+        swapGuideNone: "入れ替えたいボタンを1つ選択してください (0/2)",
+        swapGuideOne: "もう1つのボタンを選択してください (1/2: {btn})",
+        swapGuideReady: "{btn1} と {btn2} の位置を入れ替えます (2/2)",
+        btnExecuteSwap: "🔄 選択した2つの位置を入れ替える",
+        swapLeverNotSupported: "レバー本体は位置入れ替えの対象外です",
+        swapMaxTwo: "入れ替えモードでは2つまでしか選択できません（別のボタンを選ぶには選択を解除してください）",
+        swapSuccess: "{btn1} と {btn2} の位置を入れ替えました",
+        swapLockedNotice: "（編集不可）",
+        noLabelBadge: "ラベルなし",
+
         footerNote: "※生成されたCSSはOBSのブラウザソースプロパティ「カスタムCSS」に貼り付けて使用できます",
         toastCopied: "カスタムCSS全文をクリップボードにコピーしました！",
         toastSaved: "CSSファイルを保存しました！",
@@ -1246,6 +1326,22 @@
         btnSizeLabel: "Size",
         leverBaseName: "Lever Base",
 
+        modeSelectLabel: "Mode:",
+        modeMove: "Move Lever & Buttons",
+        modeSwap: "Swap Button Positions",
+        swapModeNotice: "(*Max 2 buttons, direct edit & drag disabled, lever excluded)",
+        swapPanelTitle: "🔄 Swap Button Positions",
+        swapRestrictionsNotice: "*In swap mode: Direct coordinate editing & drag disabled (Max 2 buttons, lever excluded)",
+        swapGuideNone: "Select the first button to swap (0/2)",
+        swapGuideOne: "Select the second button to swap (1/2: {btn})",
+        swapGuideReady: "Ready to swap positions of {btn1} and {btn2} (2/2)",
+        btnExecuteSwap: "🔄 Swap Positions of Selected Buttons",
+        swapLeverNotSupported: "Lever base cannot be swapped",
+        swapMaxTwo: "You can only select up to 2 buttons in swap mode (Deselect to choose another)",
+        swapSuccess: "Swapped positions of {btn1} and {btn2}",
+        swapLockedNotice: "(Read only)",
+        noLabelBadge: "No label",
+
         footerNote: "*Paste generated CSS into the \"Custom CSS\" field in OBS Browser Source properties",
         toastCopied: "Full custom CSS copied to clipboard!",
         toastSaved: "CSS file saved successfully!",
@@ -1290,6 +1386,7 @@
       });
       updateNudgeTitles();
       renderPropertyEditor();
+      updateSelectionUI();
     }
 
     const dynamicStyleEl = document.getElementById("dynamic-overlay-css");
@@ -1455,12 +1552,26 @@
        ======================================================== */
     const selectedIds = new Set();
     const buttonSettingsContainer = document.getElementById("button-settings-container");
-    const chkShowAllButtons = document.getElementById("chk-show-all-buttons");
-    const chkMultiSelect    = document.getElementById("chk-multi-select");
+    const chkShowAllButtons  = document.getElementById("chk-show-all-buttons");
+    const lblShowAllButtons  = document.getElementById("lbl-show-all-buttons");
+    const chkMultiSelect     = document.getElementById("chk-multi-select");
+    const selOperationMode   = document.getElementById("sel-operation-mode");
+    const swapModeTopNotice  = document.getElementById("swap-mode-top-notice");
+    const cardBtnSettings    = document.getElementById("card-btn-settings");
+
+    function isSwapMode() {
+      return selOperationMode && selOperationMode.value === "swap";
+    }
+    const cardSwapMode       = document.getElementById("card-swap-mode");
+    const swapCountBadge     = document.getElementById("swap-count-badge");
+    const swapGuideText      = document.getElementById("swap-guide-text");
+    const btnExecuteSwap     = document.getElementById("btn-execute-swap");
+    const btnSwapDeselect    = document.getElementById("btn-swap-deselect");
 
     function renderPropertyEditor() {
       buttonSettingsContainer.innerHTML = "";
       const showAll = chkShowAllButtons.checked;
+      const isSwap = isSwapMode();
 
       if (!showAll && selectedIds.size === 0) {
         const isMouseSelect = chkMouseSelect && chkMouseSelect.checked;
@@ -1500,7 +1611,7 @@
           const isChecked = configState[dispKey] === "flex";
           dispControlHtml = `
             <label style="font-size: 11px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-              <input type="checkbox" data-disp-key="${dispKey}" ${isChecked ? 'checked' : ''}>
+              <input type="checkbox" data-disp-key="${dispKey}" ${isChecked ? 'checked' : ''} ${isSwap ? 'disabled' : ''}>
               ${t("btnDispLabel")}
             </label>
           `;
@@ -1513,7 +1624,7 @@
             <div class="coord-field" style="grid-column: span 3;">
               <label style="width: auto;">${t("btnTextLabel")}</label>
               <div class="label-input-wrapper">
-                <input type="text" data-label-key="${labelKey}" value="${escapeHtml(val)}" maxlength="12" style="flex: 1;" autocomplete="off" spellcheck="false">
+                <input type="text" data-label-key="${labelKey}" value="${escapeHtml(val)}" maxlength="12" style="flex: 1;" autocomplete="off" spellcheck="false" ${isSwap ? 'disabled' : ''}>
                 <span class="label-ghost-suffix" aria-hidden="true">
                   <span class="ghost-invisible-text">${escapeHtml(val)}</span>
                   <span class="ghost-warn-text"> ${t("ghostTextSuggestion")}</span>
@@ -1528,18 +1639,18 @@
           sizeControlHtml = `
             <div class="coord-field">
               <label>${t("btnSizeLabel")}</label>
-              <input type="number" data-key="${def.sizeKey}" value="${configState[def.sizeKey]}" min="20" max="150" step="1" inputmode="numeric" autocomplete="off" spellcheck="false">
+              <input type="number" data-key="${def.sizeKey}" value="${configState[def.sizeKey]}" min="20" max="150" step="1" inputmode="numeric" autocomplete="off" spellcheck="false" ${isSwap ? 'disabled' : ''}>
             </div>
           `;
         }
 
-        const removeBtnHtml = (isMulti && isSelected) ? `
+        const removeBtnHtml = ((isMulti || isSwap) && isSelected) ? `
           <button type="button" class="btn-card-deselect" title="${t("deselectItem")}" style="background: none; border: none; color: var(--ui-text-dim); cursor: pointer; font-size: 13px; line-height: 1; padding: 2px 4px; border-radius: 3px;" onmouseover="this.style.color='#ff5252'" onmouseout="this.style.color='var(--ui-text-dim)'">✖</button>
         ` : '';
 
         card.innerHTML = `
           <div class="btn-edit-header">
-            <span>${defDisplayName}</span>
+            <span>${defDisplayName}${isSwap ? ` <span style="font-size: 10px; color: var(--ui-warning); font-weight: normal;">${t("swapLockedNotice")}</span>` : ""}</span>
             <div style="display: flex; align-items: center; gap: 8px;">
               ${dispControlHtml}
               <span class="btn-edit-badge">${def.id}</span>
@@ -1550,11 +1661,11 @@
             ${labelControlHtml}
             <div class="coord-field">
               <label>Top</label>
-              <input type="number" data-key="${topKey}" value="${configState[topKey]}" step="1" inputmode="numeric" autocomplete="off" spellcheck="false">
+              <input type="number" data-key="${topKey}" value="${configState[topKey]}" step="1" inputmode="numeric" autocomplete="off" spellcheck="false" ${isSwap ? 'disabled' : ''}>
             </div>
             <div class="coord-field">
               <label>Left</label>
-              <input type="number" data-key="${leftKey}" value="${configState[leftKey]}" step="1" inputmode="numeric" autocomplete="off" spellcheck="false">
+              <input type="number" data-key="${leftKey}" value="${configState[leftKey]}" step="1" inputmode="numeric" autocomplete="off" spellcheck="false" ${isSwap ? 'disabled' : ''}>
             </div>
             ${sizeControlHtml}
           </div>
@@ -1581,6 +1692,7 @@
         const ghostInv = card.querySelector(".ghost-invisible-text");
         if (textInp) {
           textInp.addEventListener("input", (e) => {
+            if (isSwapMode()) return;
             const key = e.target.dataset.labelKey;
             configState[key] = e.target.value;
             if (ghostInv) {
@@ -1594,6 +1706,7 @@
         const numInputs = card.querySelectorAll("input[type='number']");
         numInputs.forEach(inp => {
           inp.addEventListener("input", (e) => {
+            if (isSwapMode()) return;
             const key = e.target.dataset.key;
             const val = parseInt(e.target.value, 10);
             if (!isNaN(val)) {
@@ -1610,6 +1723,7 @@
         const dispCheckbox = card.querySelector("input[data-disp-key]");
         if (dispCheckbox) {
           dispCheckbox.addEventListener("change", (e) => {
+            if (isSwapMode()) return;
             const key = e.target.dataset.dispKey;
             configState[key] = e.target.checked ? "flex" : "none";
             applyConfig();
@@ -1628,10 +1742,26 @@
     }
 
     function selectElement(id) {
+      const isSwap = isSwapMode();
       const isMulti = chkMultiSelect && chkMultiSelect.checked;
 
       if (!id) {
         selectedIds.clear();
+      } else if (isSwap) {
+        if (id === "lever-base") {
+          showToast(t("swapLeverNotSupported"));
+          return;
+        }
+        if (selectedIds.has(id)) {
+          selectedIds.delete(id);
+          updateSelectionUI();
+          return;
+        }
+        if (selectedIds.size >= 2) {
+          showToast(t("swapMaxTwo"));
+          return;
+        }
+        selectedIds.add(id);
       } else if (isMulti) {
         selectedIds.add(id);
       } else {
@@ -1665,13 +1795,97 @@
         btnDeselect.style.cursor = hasSelection ? "pointer" : "default";
       }
 
-      // 1px一括移動ボタン群の活性/非活性同期
+      // 1px一括移動ボタン群の活性/非活性同期（入れ替えモード中は常に無効）
+      const isSwap = isSwapMode();
       const hasSelection = (selectedIds.size > 0);
       document.querySelectorAll(".btn-nudge").forEach(b => {
-        b.disabled = !hasSelection;
-        b.style.opacity = hasSelection ? "1" : "0.5";
-        b.style.cursor = hasSelection ? "pointer" : "default";
+        const canNudge = !isSwap && hasSelection;
+        b.disabled = !canNudge;
+        b.style.opacity = canNudge ? "1" : "0.5";
+        b.style.cursor = canNudge ? "pointer" : "default";
       });
+
+      // ボタン位置入れ替えパネルのUI同期
+      if (isSwap && cardSwapMode) {
+        if (swapCountBadge) swapCountBadge.textContent = `${selectedIds.size} / 2`;
+        const hasSwapSelection = (selectedIds.size > 0);
+        if (btnSwapDeselect) {
+          btnSwapDeselect.disabled = !hasSwapSelection;
+          btnSwapDeselect.style.opacity = hasSwapSelection ? "1" : "0.5";
+          btnSwapDeselect.style.cursor = hasSwapSelection ? "pointer" : "default";
+        }
+
+        const swapSelectedCards = document.getElementById("swap-selected-cards");
+        if (swapSelectedCards) {
+          swapSelectedCards.innerHTML = "";
+          selectedIds.forEach(id => {
+            const def = ELEMENTS_DEF.find(d => d.id === id);
+            if (!def) return;
+            const topKey = `pos${def.keyName}Top`;
+            const leftKey = `pos${def.keyName}Left`;
+            const rawLabel = (def.hasLabel && def.labelKey && configState[def.labelKey] !== undefined && configState[def.labelKey] !== null) ? String(configState[def.labelKey]).trim() : "";
+            const labelBadgeHtml = def.hasLabel
+              ? (rawLabel
+                  ? `<span style="margin-left: 2px; padding: 1px 5px; background: rgba(255, 255, 255, 0.12); border: 1px solid var(--ui-panel-border); border-radius: 3px; color: #fff; font-weight: bold;">${escapeHtml(rawLabel)}</span>`
+                  : `<span style="margin-left: 2px; padding: 1px 5px; background: rgba(255, 255, 255, 0.04); border: 1px dashed var(--ui-panel-border); border-radius: 3px; color: var(--ui-text-dim); font-size: 10px;">${t("noLabelBadge")}</span>`)
+              : "";
+            const cardEl = document.createElement("div");
+            cardEl.style.cssText = "display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--ui-accent); border-radius: 5px; font-size: 11px; gap: 6px;";
+            cardEl.innerHTML = `
+              <div style="display: flex; align-items: center; gap: 4px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                <strong style="color: #fff;">${def.name}</strong>
+                ${labelBadgeHtml}
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                <span style="font-family: monospace; color: var(--ui-accent); font-weight: bold;">
+                  Top: ${configState[topKey]} / Left: ${configState[leftKey]}
+                </span>
+                <button type="button" class="btn-swap-card-deselect" title="${t("deselectItem")}" style="background: none; border: none; color: var(--ui-text-dim); cursor: pointer; font-size: 13px; line-height: 1; padding: 2px 4px; border-radius: 3px;" onmouseover="this.style.color='#ff5252'" onmouseout="this.style.color='var(--ui-text-dim)'">✖</button>
+              </div>
+            `;
+            const removeBtn = cardEl.querySelector(".btn-swap-card-deselect");
+            if (removeBtn) {
+              removeBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                deselectElement(id);
+              });
+            }
+            swapSelectedCards.appendChild(cardEl);
+          });
+        }
+
+        if (selectedIds.size === 0) {
+          if (swapGuideText) swapGuideText.textContent = t("swapGuideNone");
+          if (btnExecuteSwap) {
+            btnExecuteSwap.disabled = true;
+            btnExecuteSwap.style.opacity = "0.5";
+            btnExecuteSwap.style.cursor = "default";
+          }
+        } else if (selectedIds.size === 1) {
+          const id1 = Array.from(selectedIds)[0];
+          const def1 = ELEMENTS_DEF.find(d => d.id === id1);
+          const name1 = def1 ? def1.name : id1;
+          if (swapGuideText) swapGuideText.innerHTML = t("swapGuideOne").replace("{btn}", `<strong>${name1}</strong>`);
+          if (btnExecuteSwap) {
+            btnExecuteSwap.disabled = true;
+            btnExecuteSwap.style.opacity = "0.5";
+            btnExecuteSwap.style.cursor = "default";
+          }
+        } else if (selectedIds.size === 2) {
+          const ids = Array.from(selectedIds);
+          const def1 = ELEMENTS_DEF.find(d => d.id === ids[0]);
+          const def2 = ELEMENTS_DEF.find(d => d.id === ids[1]);
+          const name1 = def1 ? def1.name : ids[0];
+          const name2 = def2 ? def2.name : ids[1];
+          if (swapGuideText) swapGuideText.innerHTML = t("swapGuideReady").replace("{btn1}", `<strong>${name1}</strong>`).replace("{btn2}", `<strong>${name2}</strong>`);
+          if (btnExecuteSwap) {
+            btnExecuteSwap.disabled = false;
+            btnExecuteSwap.style.opacity = "1";
+            btnExecuteSwap.style.cursor = "pointer";
+          }
+        }
+      }
+
       renderPropertyEditor();
 
       // カードが一覧にある場合は最後に選択したカードをスクロール表示
@@ -1687,6 +1901,76 @@
 
     const multiMoveKeypad = document.getElementById("multi-move-keypad");
     const btnSettingsDesc = document.getElementById("btn-settings-desc");
+
+    if (selOperationMode) {
+      selOperationMode.addEventListener("change", () => {
+        const isSwap = isSwapMode();
+        selectedIds.clear();
+        if (swapModeTopNotice) {
+          swapModeTopNotice.style.display = isSwap ? "inline" : "none";
+        }
+        if (isSwap) {
+          document.body.classList.add("swap-mode-active");
+          if (cardBtnSettings) cardBtnSettings.style.display = "none";
+          if (cardSwapMode) cardSwapMode.style.display = "flex";
+          if (chkMultiSelect) {
+            chkMultiSelect.checked = false;
+            chkMultiSelect.disabled = true;
+          }
+          if (multiMoveKeypad) multiMoveKeypad.style.display = "none";
+          if (btnSettingsDesc) btnSettingsDesc.style.display = "block";
+          if (chkMouseDrag) chkMouseDrag.disabled = true;
+          if (lblMouseDrag) lblMouseDrag.style.opacity = "0.5";
+          if (chkShowAllButtons) chkShowAllButtons.disabled = true;
+        } else {
+          document.body.classList.remove("swap-mode-active");
+          if (cardBtnSettings) cardBtnSettings.style.display = "block";
+          if (cardSwapMode) cardSwapMode.style.display = "none";
+          if (chkMultiSelect) chkMultiSelect.disabled = false;
+          const canDrag = !!(chkMouseSelect && chkMouseSelect.checked);
+          if (chkMouseDrag) chkMouseDrag.disabled = !canDrag;
+          if (lblMouseDrag) lblMouseDrag.style.opacity = canDrag ? "1" : "0.5";
+          if (chkShowAllButtons) chkShowAllButtons.disabled = false;
+        }
+        updateSelectionUI();
+      });
+    }
+
+    if (btnSwapDeselect) {
+      btnSwapDeselect.addEventListener("click", () => {
+        selectElement(null);
+      });
+    }
+
+    if (btnExecuteSwap) {
+      btnExecuteSwap.addEventListener("click", () => {
+        if (selectedIds.size !== 2) return;
+        const ids = Array.from(selectedIds);
+        const def1 = ELEMENTS_DEF.find(d => d.id === ids[0]);
+        const def2 = ELEMENTS_DEF.find(d => d.id === ids[1]);
+        if (!def1 || !def2) return;
+
+        const top1Key  = `pos${def1.keyName}Top`;
+        const left1Key = `pos${def1.keyName}Left`;
+        const top2Key  = `pos${def2.keyName}Top`;
+        const left2Key = `pos${def2.keyName}Left`;
+
+        const tmpTop  = configState[top1Key];
+        const tmpLeft = configState[left1Key];
+        configState[top1Key]  = configState[top2Key];
+        configState[left1Key] = configState[left2Key];
+        configState[top2Key]  = tmpTop;
+        configState[left2Key] = tmpLeft;
+
+        applyConfig();
+        updateSelectionUI();
+
+        const msg = t("swapSuccess")
+          .replace("{btn1}", def1.name)
+          .replace("{btn2}", def2.name);
+        showToast(msg);
+      });
+    }
 
     if (chkMultiSelect) {
       chkMultiSelect.addEventListener("change", () => {
@@ -1908,9 +2192,10 @@
       const isSelectOn = chkMouseSelect.checked;
       document.body.classList.toggle("mouse-select-enabled", isSelectOn);
 
-      // マウス移動チェックボックスの連動制御
-      chkMouseDrag.disabled = !isSelectOn;
-      lblMouseDrag.style.opacity = isSelectOn ? "1" : "0.5";
+      // マウス移動チェックボックスの連動制御（入れ替えモード中は常に無効）
+      const canDrag = isSelectOn && !isSwapMode();
+      chkMouseDrag.disabled = !canDrag;
+      lblMouseDrag.style.opacity = canDrag ? "1" : "0.5";
       if (!isSelectOn) {
         chkMouseDrag.checked = false;
         document.body.classList.remove("mouse-drag-enabled");
@@ -1943,7 +2228,8 @@
       const id = target.id;
       selectElement(id);
 
-      // 移動が無効の場合は選択のみでドラッグは開始しない
+      // 入れ替えモード中またはドラッグ無効の場合は選択のみでドラッグは開始しない
+      if (isSwapMode()) return;
       if (!chkMouseDrag.checked) return;
 
       isDragging = true;
@@ -2196,7 +2482,7 @@
         }
 
         applyConfig();
-        renderPropertyEditor();
+        updateSelectionUI();
         savedCssText = generateCSSText();
         showToast(t("toastLoaded").replace("{count}", matchedCount));
       } else {
@@ -2280,20 +2566,24 @@
               if (i === 12 && configState.jumpDisplay === "flex") {
                 targetId = "btn-12";
               } else {
-                // レバーの移動入力としてレバー本体を選択
-                targetId = "lever-base";
+                // レバーの移動入力としてレバー本体を選択（入れ替えモード中は対象外）
+                targetId = isSwapMode() ? null : "lever-base";
               }
             } else {
               targetId = (i === 12) ? "btn-12" : `btn-${String(i).padStart(2, "0")}`;
             }
 
             if (targetId && document.getElementById(targetId)) {
-              const isMulti = chkMultiSelect && chkMultiSelect.checked;
-              const alreadySelected = isMulti 
-                ? selectedIds.has(targetId) 
-                : (selectedIds.size === 1 && selectedIds.has(targetId));
-              if (!alreadySelected) {
+              if (isSwapMode()) {
                 selectElement(targetId);
+              } else {
+                const isMulti = chkMultiSelect && chkMultiSelect.checked;
+                const alreadySelected = isMulti 
+                  ? selectedIds.has(targetId) 
+                  : (selectedIds.size === 1 && selectedIds.has(targetId));
+                if (!alreadySelected) {
+                  selectElement(targetId);
+                }
               }
             }
           }
@@ -2301,7 +2591,7 @@
 
         // アナログスティック操作（立ち上がりエッジ）でレバーを自動選択
         const isStickActive = (Math.abs(rx) > 0.4 || Math.abs(ry) > 0.4);
-        if (isLeverActive && isStickActive && !prevStickActive) {
+        if (isLeverActive && isStickActive && !prevStickActive && (!isSwapMode())) {
           const isMulti = chkMultiSelect && chkMultiSelect.checked;
           const alreadySelected = isMulti 
             ? selectedIds.has("lever-base") 

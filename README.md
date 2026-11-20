@@ -24,11 +24,12 @@ OBS Studioのブラウザソースや一般的なWebブラウザ上で動作す�
 ---
 
 > [!IMPORTANT]
-> **【OBS 33系におけるコントローラー入力停止問題について】**  
-> 現在、OBS 33系では、OBSにフォーカスが無い間はブラウザソースへコントローラー入力が届かず、表示が止まる問題が確認されています。OBS側の問題のため、本ツール側では修正できません。(OBS側のissueで修正に向けた動きがあることは確認できます)  
-> 当面の回避策は、OBS 32系統のバージョンを利用いただくこと、になります。
+> **【OBS 33.0.0 / 33.0.1 におけるコントローラー入力停止問題について】**  
+> OBS 33.0.0 および 33.0.1 では、OBSにフォーカスが無い間はブラウザソースへコントローラー入力が届かず、表示が止まる問題が確認されています。OBS側の問題のため、本ツール側では修正できません。  
+> なお、OBS 33.0.2 にて本問題の修正が予定されています。修正版がリリースされるまでの回避策は、OBS 32系統のバージョンを利用いただくこと、になります。
 > 
 > 詳細・最新状況:
+> - OBS 33.0.2 修正予定（PR）: https://github.com/obsproject/obs-studio/pull/14219 / https://github.com/obsproject/obs-studio/pull/14181
 > - OBS側のissue: https://github.com/obsproject/obs-studio/issues/14083
 > - OBS側のissue（Windows）: https://github.com/obsproject/obs-studio/issues/14139
 > - GPV(GamePad Viewer) の状況ページ: https://status.gamepadviewer.com/obs-33-background-input/

@@ -11,7 +11,7 @@
   <style>
     /*
      * =================================================================
-     * 天板レイアウトさん v1.0.1 - for obs-lever-leverless-input-overlay
+     * 天板レイアウトさん v1.0.2 - for obs-lever-leverless-input-overlay
      * License: 0BSD (SPDX-License-Identifier: 0BSD)
      * Copyright (C) 2026 Nanmo
      * =================================================================
@@ -21,6 +21,8 @@
        ベースUIスタイル（エディター共通）
        ======================================================== */
     :root {
+      color-scheme: dark;
+      accent-color: var(--ui-accent);
       --ui-bg: #141419;
       --ui-panel-bg: #1e1e28;
       --ui-panel-header: #262634;
@@ -42,6 +44,7 @@
       color: var(--ui-text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
       height: 100vh;
+      height: 100dvh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -246,20 +249,21 @@
       outline: 3px solid #ffcc00 !important;
     }
 
-    /* CSS拡大モーダル */
-    .modal-backdrop {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
+    /* CSS拡大モーダル（ネイティブ <dialog> + フォールバック対応） */
+    dialog.modal-dialog {
+      border: none;
+      padding: 0;
+      margin: auto;
+      background: transparent;
+      color: inherit;
+      max-width: 95vw;
+      max-height: 90vh;
+      max-height: 90dvh;
+      overflow: visible;
+    }
+    dialog.modal-dialog::backdrop {
       background: rgba(0, 0, 0, 0.75);
       backdrop-filter: blur(4px);
-      z-index: 99999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
     }
     .modal-content {
       background: var(--ui-panel-bg);
@@ -268,6 +272,7 @@
       width: 900px;
       max-width: 95vw;
       height: 85vh;
+      height: 85dvh;
       display: flex;
       flex-direction: column;
       box-shadow: 0 12px 36px rgba(0, 0, 0, 0.9);
@@ -438,6 +443,34 @@
       outline: none;
       border-color: var(--ui-accent);
     }
+    .coord-field input[type="number"]:focus-visible,
+    .coord-field input[type="text"]:focus-visible,
+    .tool-settings select:focus-visible,
+    .btn-action:focus-visible,
+    .btn-card-deselect:focus-visible,
+    .btn-swap-card-deselect:focus-visible {
+      outline: 2px solid var(--ui-accent);
+      outline-offset: 2px;
+    }
+    .btn-card-deselect,
+    .btn-swap-card-deselect {
+      background: none;
+      border: none;
+      color: var(--ui-text-dim);
+      cursor: pointer;
+      font-size: 13px;
+      line-height: 1;
+      padding: 2px 4px;
+      border-radius: 3px;
+      transition: color 0.15s;
+    }
+    .btn-card-deselect:hover,
+    .btn-swap-card-deselect:hover {
+      color: var(--ui-danger);
+    }
+    .btn-nudge {
+      touch-action: none;
+    }
     .label-input-wrapper {
       position: relative;
       flex: 1;
@@ -520,9 +553,12 @@
       font-family: monospace;
     }
 
-    /* トースト通知 */
+    /* トースト通知（popover="manual" トップレイヤー + 従来フォールバック対応） */
     #toast {
       position: fixed;
+      inset: auto;
+      margin: 0;
+      border: none;
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%) translateY(100px);
@@ -539,6 +575,14 @@
     }
     #toast.show {
       transform: translateX(-50%) translateY(0);
+    }
+
+    /* 動きを減らす設定への配慮 */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+      }
     }
 
     /* ========================================================
@@ -696,6 +740,7 @@
     body.mouse-drag-enabled:not(.swap-mode-active) .btn,
     body.mouse-drag-enabled:not(.swap-mode-active) #lever-base {
       cursor: grab;
+      touch-action: none;
     }
     body.mouse-drag-enabled:not(.swap-mode-active) .btn:active,
     body.mouse-drag-enabled:not(.swap-mode-active) #lever-base:active {
@@ -746,7 +791,7 @@
     <div class="title-group">
       <div class="title-main-row">
         <h1 data-i18n="appTitle">天板レイアウトさん</h1>
-        <span class="version-badge">v1.0.1</span>
+        <span class="version-badge">v1.0.2</span>
       </div>
       <div class="subtitle">
         for <a href="https://github.com/nanmo/obs-lever-leverless-input-overlay" target="_blank" rel="noopener noreferrer">obs-lever-leverless-input-overlay</a>
@@ -1041,10 +1086,10 @@
   </footer>
 
   <!-- CSSプレビュー拡大表示モーダル -->
-  <div id="modal-css-expand" class="modal-backdrop" style="display: none;">
+  <dialog id="modal-css-expand" class="modal-dialog" aria-labelledby="modal-css-title">
     <div class="modal-content">
       <div class="modal-header">
-        <span class="modal-title" data-i18n="cssPreviewTitle">カスタムCSSプレビュー</span>
+        <span id="modal-css-title" class="modal-title" data-i18n="cssPreviewTitle">カスタムCSSプレビュー</span>
         <button type="button" id="btn-close-modal" class="btn-action btn-secondary" style="padding: 4px 10px;" data-i18n="btnCloseExpandCss">
           ✖ 閉じる
         </button>
@@ -1058,10 +1103,10 @@
         </button>
       </div>
     </div>
-  </div>
+  </dialog>
 
   <!-- トースト通知 -->
-  <div id="toast">クリップボードにコピーしました！</div>
+  <div id="toast" role="status" aria-live="polite" popover="manual">クリップボードにコピーしました！</div>
 
   <script>
     /* ========================================================
@@ -1369,6 +1414,7 @@
 
     function applyLanguage(lang) {
       currentLang = lang;
+      document.documentElement.lang = lang;
       const selectEl = document.getElementById("lang-select");
       if (selectEl && selectEl.value !== lang) {
         selectEl.value = lang;
@@ -1620,11 +1666,12 @@
         let labelControlHtml = "";
         if (labelKey) {
           const val = (configState[labelKey] !== undefined && configState[labelKey] !== null) ? String(configState[labelKey]) : "";
+          const labelInputId = `input-label-${def.id}`;
           labelControlHtml = `
             <div class="coord-field" style="grid-column: span 3;">
-              <label style="width: auto;">${t("btnTextLabel")}</label>
+              <label for="${labelInputId}" style="width: auto;">${t("btnTextLabel")}</label>
               <div class="label-input-wrapper">
-                <input type="text" data-label-key="${labelKey}" value="${escapeHtml(val)}" maxlength="12" style="flex: 1;" autocomplete="off" spellcheck="false" ${isSwap ? 'disabled' : ''}>
+                <input type="text" id="${labelInputId}" data-label-key="${labelKey}" value="${escapeHtml(val)}" maxlength="12" style="flex: 1;" autocomplete="off" spellcheck="false" ${isSwap ? 'disabled' : ''}>
                 <span class="label-ghost-suffix" aria-hidden="true">
                   <span class="ghost-invisible-text">${escapeHtml(val)}</span>
                   <span class="ghost-warn-text"> ${t("ghostTextSuggestion")}</span>
@@ -1636,17 +1683,21 @@
 
         let sizeControlHtml = "";
         if (def.hasSize && def.sizeKey) {
+          const sizeInputId = `input-size-${def.id}`;
           sizeControlHtml = `
             <div class="coord-field">
-              <label>${t("btnSizeLabel")}</label>
-              <input type="number" data-key="${def.sizeKey}" value="${configState[def.sizeKey]}" min="20" max="150" step="1" inputmode="numeric" autocomplete="off" spellcheck="false" ${isSwap ? 'disabled' : ''}>
+              <label for="${sizeInputId}">${t("btnSizeLabel")}</label>
+              <input type="number" id="${sizeInputId}" data-key="${def.sizeKey}" value="${configState[def.sizeKey]}" min="20" max="150" step="1" inputmode="numeric" autocomplete="off" spellcheck="false" ${isSwap ? 'disabled' : ''}>
             </div>
           `;
         }
 
         const removeBtnHtml = ((isMulti || isSwap) && isSelected) ? `
-          <button type="button" class="btn-card-deselect" title="${t("deselectItem")}" style="background: none; border: none; color: var(--ui-text-dim); cursor: pointer; font-size: 13px; line-height: 1; padding: 2px 4px; border-radius: 3px;" onmouseover="this.style.color='#ff5252'" onmouseout="this.style.color='var(--ui-text-dim)'">✖</button>
+          <button type="button" class="btn-card-deselect" title="${t("deselectItem")}" aria-label="${t("deselectItem")}">✖</button>
         ` : '';
+
+        const topInputId  = `input-top-${def.id}`;
+        const leftInputId = `input-left-${def.id}`;
 
         card.innerHTML = `
           <div class="btn-edit-header">
@@ -1660,12 +1711,12 @@
           <div class="coords-grid">
             ${labelControlHtml}
             <div class="coord-field">
-              <label>Top</label>
-              <input type="number" data-key="${topKey}" value="${configState[topKey]}" step="1" inputmode="numeric" autocomplete="off" spellcheck="false" ${isSwap ? 'disabled' : ''}>
+              <label for="${topInputId}">Top</label>
+              <input type="number" id="${topInputId}" data-key="${topKey}" value="${configState[topKey]}" step="1" inputmode="numeric" autocomplete="off" spellcheck="false" ${isSwap ? 'disabled' : ''}>
             </div>
             <div class="coord-field">
-              <label>Left</label>
-              <input type="number" data-key="${leftKey}" value="${configState[leftKey]}" step="1" inputmode="numeric" autocomplete="off" spellcheck="false" ${isSwap ? 'disabled' : ''}>
+              <label for="${leftInputId}">Left</label>
+              <input type="number" id="${leftInputId}" data-key="${leftKey}" value="${configState[leftKey]}" step="1" inputmode="numeric" autocomplete="off" spellcheck="false" ${isSwap ? 'disabled' : ''}>
             </div>
             ${sizeControlHtml}
           </div>
@@ -1682,7 +1733,7 @@
 
         // クリックで選択
         card.addEventListener("click", (e) => {
-          if (!e.target.matches("input") && !e.target.matches("button")) {
+          if (!e.target.matches("input") && !e.target.matches("button") && !e.target.matches("label")) {
             selectElement(def.id);
           }
         });
@@ -1840,7 +1891,7 @@
                 <span style="font-family: monospace; color: var(--ui-accent); font-weight: bold;">
                   Top: ${configState[topKey]} / Left: ${configState[leftKey]}
                 </span>
-                <button type="button" class="btn-swap-card-deselect" title="${t("deselectItem")}" style="background: none; border: none; color: var(--ui-text-dim); cursor: pointer; font-size: 13px; line-height: 1; padding: 2px 4px; border-radius: 3px;" onmouseover="this.style.color='#ff5252'" onmouseout="this.style.color='var(--ui-text-dim)'">✖</button>
+                <button type="button" class="btn-swap-card-deselect" title="${t("deselectItem")}" aria-label="${t("deselectItem")}">✖</button>
               </div>
             `;
             const removeBtn = cardEl.querySelector(".btn-swap-card-deselect");
@@ -2013,10 +2064,13 @@
       const dy = parseInt(btn.dataset.dy, 10) || 0;
       let handledByPointer = false;
 
-      const startPress = (e) => {
-        if (e.button !== undefined && e.button !== 0) return;
+      btn.addEventListener("pointerdown", (e) => {
+        if (e.pointerType === "mouse" && e.button !== 0) return;
         if (btn.disabled || selectedIds.size === 0) return;
         handledByPointer = true;
+        if (typeof btn.setPointerCapture === "function") {
+          try { btn.setPointerCapture(e.pointerId); } catch (_) {}
+        }
         stopNudge();
         stepNudge(dx, dy);
 
@@ -2025,18 +2079,11 @@
             stepNudge(dx, dy);
           }, 16);
         }, 433);
-      };
+      });
 
-      btn.addEventListener("mousedown", startPress);
-      btn.addEventListener("mouseup", stopNudge);
-      btn.addEventListener("mouseleave", stopNudge);
-
-      btn.addEventListener("touchstart", (e) => {
-        e.preventDefault();
-        startPress(e);
-      }, { passive: false });
-      btn.addEventListener("touchend", stopNudge);
-      btn.addEventListener("touchcancel", stopNudge);
+      btn.addEventListener("pointerup", stopNudge);
+      btn.addEventListener("pointercancel", stopNudge);
+      btn.addEventListener("lostpointercapture", stopNudge);
 
       btn.addEventListener("click", () => {
         if (handledByPointer) {
@@ -2047,7 +2094,8 @@
       });
     });
 
-    window.addEventListener("mouseup", stopNudge);
+    window.addEventListener("pointerup", stopNudge);
+    window.addEventListener("pointercancel", stopNudge);
 
     /* ========================================================
        モード・ログ表示設定チェックボックス
@@ -2143,19 +2191,33 @@
     const btnCloseModal   = document.getElementById("btn-close-modal");
     const btnModalCopyCss = document.getElementById("btn-modal-copy-css");
 
+    function openCssModal() {
+      if (!modalCssExpand) return;
+      if (modalCssTextarea) modalCssTextarea.value = cssTextareaEl.value;
+      if (typeof modalCssExpand.showModal === "function") {
+        if (!modalCssExpand.open) modalCssExpand.showModal();
+      } else {
+        modalCssExpand.setAttribute("open", "");
+      }
+    }
+
+    function closeCssModal() {
+      if (!modalCssExpand) return;
+      if (typeof modalCssExpand.close === "function") {
+        if (modalCssExpand.open) modalCssExpand.close();
+      } else {
+        modalCssExpand.removeAttribute("open");
+      }
+    }
+
     if (btnExpandCss && modalCssExpand) {
-      btnExpandCss.addEventListener("click", () => {
-        if (modalCssTextarea) modalCssTextarea.value = cssTextareaEl.value;
-        modalCssExpand.style.display = "flex";
-      });
+      btnExpandCss.addEventListener("click", openCssModal);
       if (btnCloseModal) {
-        btnCloseModal.addEventListener("click", () => {
-          modalCssExpand.style.display = "none";
-        });
+        btnCloseModal.addEventListener("click", closeCssModal);
       }
       modalCssExpand.addEventListener("click", (e) => {
         if (e.target === modalCssExpand) {
-          modalCssExpand.style.display = "none";
+          closeCssModal();
         }
       });
       if (btnModalCopyCss) {
@@ -2210,6 +2272,7 @@
     });
 
     let isDragging = false;
+    let activeDragPointerId = null;
     let dragStartX = 0;
     let dragStartY = 0;
     const dragStartPositions = new Map();
@@ -2219,7 +2282,15 @@
       return found ? found.keyName : null;
     }
 
-    document.getElementById("overlay-root").addEventListener("mousedown", (e) => {
+    function endDrag(e) {
+      if (activeDragPointerId !== null && e && e.pointerId !== undefined && e.pointerId !== activeDragPointerId) return;
+      isDragging = false;
+      activeDragPointerId = null;
+      dragStartPositions.clear();
+    }
+
+    document.getElementById("overlay-root").addEventListener("pointerdown", (e) => {
+      if (e.pointerType === "mouse" && e.button !== 0) return;
       if (!chkMouseSelect.checked) return;
 
       const target = e.target.closest(".btn, #lever-base");
@@ -2233,6 +2304,7 @@
       if (!chkMouseDrag.checked) return;
 
       isDragging = true;
+      activeDragPointerId = e.pointerId;
       dragStartX = e.clientX;
       dragStartY = e.clientY;
       dragStartPositions.clear();
@@ -2248,11 +2320,15 @@
         }
       });
 
+      if (typeof target.setPointerCapture === "function") {
+        try { target.setPointerCapture(e.pointerId); } catch (_) {}
+      }
       e.preventDefault();
     });
 
-    window.addEventListener("mousemove", (e) => {
+    window.addEventListener("pointermove", (e) => {
       if (!isDragging || dragStartPositions.size === 0) return;
+      if (activeDragPointerId !== null && e.pointerId !== activeDragPointerId) return;
 
       const zoom = parseFloat(zoomSelect.value);
       const dx = (e.clientX - dragStartX) / zoom;
@@ -2267,10 +2343,8 @@
       renderPropertyEditor();
     });
 
-    window.addEventListener("mouseup", () => {
-      isDragging = false;
-      dragStartPositions.clear();
-    });
+    window.addEventListener("pointerup", endDrag);
+    window.addEventListener("pointercancel", endDrag);
 
     /* ========================================================
        クリップボードにコピー & トースト
@@ -2278,13 +2352,34 @@
     const btnCopyCss = document.getElementById("btn-copy-css");
     const toastEl = document.getElementById("toast");
     let toastTimer = null;
+    let toastHideTimer = null;
 
     function showToast(msg) {
       toastEl.textContent = msg;
+      if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
+      if (toastHideTimer) { clearTimeout(toastHideTimer); toastHideTimer = null; }
+
+      if (typeof toastEl.showPopover === "function") {
+        try {
+          if (!toastEl.matches(":popover-open")) {
+            toastEl.showPopover();
+          }
+        } catch (_) {}
+      }
+      void toastEl.offsetWidth;
       toastEl.classList.add("show");
-      if (toastTimer) clearTimeout(toastTimer);
+
       toastTimer = setTimeout(() => {
         toastEl.classList.remove("show");
+        if (typeof toastEl.hidePopover === "function") {
+          toastHideTimer = setTimeout(() => {
+            try {
+              if (toastEl.matches(":popover-open")) {
+                toastEl.hidePopover();
+              }
+            } catch (_) {}
+          }, 260);
+        }
       }, 2000);
     }
 

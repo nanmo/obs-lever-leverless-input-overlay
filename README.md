@@ -23,27 +23,9 @@ OBS Studioのブラウザソースや一般的なWebブラウザ上で動作す�
 
 ---
 
-> [!IMPORTANT]
+> [!NOTE]
 > **【OBS 33.0.0 / 33.0.1 におけるコントローラー入力停止問題について】**  
-> OBS 33.0.0 および 33.0.1 では、OBSにフォーカスが無い間はブラウザソースへコントローラー入力が届かず、表示が止まる問題が確認されています。OBS側の問題のため、本ツール側では修正できません。  
-> なお、OBS 33.0.2 にて本問題の修正が予定されています。修正版がリリースされるまでの回避策は、OBS 32系統のバージョンを利用いただくこと、になります。
-> 
-> 詳細・最新状況:
-> - OBS 33.0.2 修正予定（PR）: https://github.com/obsproject/obs-studio/pull/14219 / https://github.com/obsproject/obs-studio/pull/14181
-> - OBS側のissue: https://github.com/obsproject/obs-studio/issues/14083
-> - OBS側のissue（Windows）: https://github.com/obsproject/obs-studio/issues/14139
-> - GPV(GamePad Viewer) の状況ページ: https://status.gamepadviewer.com/obs-33-background-input/
-
----
-
-> [!IMPORTANT]
-> **【Steamゲーム起動時などにオーバーレイの画面更新が停止する場合】**
-> - **現象・原因**: Steam Inputの排他フックやケーブル抜き差し等により、コントローラーの瞬断・接続変更が発生してオーバーレイの画面更新が停止することがあります。
-> - **対策 (v1.0.1)**: 接続状態の変更に追従しやすくする処理を追加しました。すでにダウンロード済みの方は **最新版の再ダウンロード** を推奨します。InputOverlay.htmlのファイル先頭付近にバージョン表記を入れるようにしました。
-> - **回避策**: 対象タイトルのプロパティから **「Steam入力を無効」** に設定していただくと、Steam Inputの排他フック処理による停止は起きにくくなります。
->   - 検証中ではありますが、Steam Input有効時の一時的な排他的フック処理で不具合が発現しやすいようです。
->   - ※主にDirectInputのみ対応のゲームパッドなど、ゲームプレイにSteam Inputの有効化が必須なデバイスもあります。
-> - **情報提供のお願い**: Steam Inputの設定状態を問わず、理由不明のままコントローラーの抜き差しを行うことで改善してしまうパターンもあり、検証しきれないところがあります。不具合を発見しましたら再現状況やOBSのバージョン（※OBS 33で内部ブラウザ基盤が大幅に更新されています）などをお伝えいただけると解決しやすくなります。
+> OBS 33.0.0 および 33.0.1 で発生していた、OBSにフォーカスが無い間にブラウザソースへコントローラー入力が届かず表示が止まる問題については、**[OBS 33.0.2 以降で修正されていることを確認しています](https://github.com/obsproject/obs-studio/releases/tag/33.0.3)**。該当バージョンをご利用の場合は OBS を 33.0.2 以降へアップデートしてください。
 
 ---
 
@@ -233,6 +215,19 @@ CSSファイルの座標（Top/Left）やサイズ数値を1ピクセルずつ�
 ├── LICENSE                 # ライセンス定義（0BSD）
 └── .gitignore              # Git除外設定
 ```
+
+---
+
+## 不具合を発見された場合
+
+動作不良や表示が止まるなどの不具合を発見された場合は、以下の情報などを添えて GitHub の [Issues](https://github.com/nanmo/obs-lever-leverless-input-overlay/issues) までお知らせください。
+
+- 再現状況
+- 使用している本ツールのバージョン（HTMLファイル先頭付近に記載）
+- OBSのバージョン（または使用ブラウザ）
+- Steamゲームの場合は Steam Input の有効／無効
+
+※X（[https://x.com/nanimosa](https://x.com/nanimosa)）へお知らせいただいても構いませんが、通知が埋もれて見落とす可能性があります。
 
 ---
 
